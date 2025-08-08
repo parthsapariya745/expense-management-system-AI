@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses Management System</title>
+    <style>
+        :root {
+            /* Light theme colors */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-blue-light: #dbeafe;
+            --accent-green: #059669;
+            --accent-green-light: #dcfce7;
+            --accent-red: #dc2626;
+            --accent-red-light: #fee2e2;
+            --accent-yellow: #d97706;
+            --accent-yellow-light: #fef3c7;
+            --sidebar-bg: #ffffff;
+            --sidebar-border: #e2e8f0;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #d1d5db;
+            --input-focus: #2563eb;
+            --table-header-bg: #f9fafb;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme colors */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --border-light: #475569;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.4);
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
+            --accent-blue-light: #1e3a8a;
+            --accent-green: #10b981;
+            --accent-green-light: #064e3b;
+            --accent-red: #ef4444;
+            --accent-red-light: #7f1d1d;
+            --accent-yellow: #f59e0b;
+            --accent-yellow-light: #78350f;
+            --sidebar-bg: #1e293b;
+            --sidebar-border: #334155;
+            --card-bg: #1e293b;
+            --input-bg: #334155;
+            --input-border: #475569;
+            --input-focus: #3b82f6;
+            --table-header-bg: #334155;
+            --modal-overlay: rgba(0, 0, 0, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            box-shadow: 0 4px 12px var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            box-shadow: 0 1px 3px var(--shadow);
+            padding: 0;
+            border-right: 1px solid var(--sidebar-border);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-blue-light);
+            color: var(--accent-blue);
+            border-right: 2px solid var(--accent-blue);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.75rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            padding-top: 80px; /* Space for theme toggle */
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-cols-1 { grid-template-columns: 1fr; }
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+        @media (max-width: 768px) {
+            .grid-cols-2, .grid-cols-3, .grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-blue-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Tables */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            font-weight: 600;
+            color: var(--text-primary);
+            background-color: var(--table-header-bg);
+        }
+
+        .table td {
+            color: var(--text-secondary);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-green {
+            background-color: var(--accent-green-light);
+            color: var(--accent-green);
+        }
+
+        .badge-yellow {
+            background-color: var(--accent-yellow-light);
+            color: var(--accent-yellow);
+        }
+
+        .badge-blue {
+            background-color: var(--accent-blue-light);
+            color: var(--accent-blue);
+        }
+
+        .badge-red {
+            background-color: var(--accent-red-light);
+            color: var(--accent-red);
+        }
+
+        .badge-gray {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px var(--shadow);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+        }
+
+        .stat-green { color: var(--accent-green); }
+        .stat-red { color: var(--accent-red); }
+        .stat-blue { color: var(--accent-blue); }
+
+        .icon-green { 
+            background-color: var(--accent-green-light); 
+            color: var(--accent-green); 
+        }
+        .icon-red { 
+            background-color: var(--accent-red-light); 
+            color: var(--accent-red); 
+        }
+        .icon-blue { 
+            background-color: var(--accent-blue-light); 
+            color: var(--accent-blue); 
+        }
+
+        /* Tabs */
+        .tabs {
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-list {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .tab-button:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-overlay);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Utility Classes */
+        .flex {
+            display: flex;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+                padding: 1rem;
+                padding-top: 80px;
+            }
+
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Dark mode specific adjustments */
+        [data-theme="dark"] .nav-item.active {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+
+        [data-theme="dark"] .badge-green {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+
+        [data-theme="dark"] .badge-yellow {
+            background-color: rgba(245, 158, 11, 0.2);
+        }
+
+        [data-theme="dark"] .badge-blue {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+
+        [data-theme="dark"] .badge-red {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        [data-theme="dark"] .icon-green {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+
+        [data-theme="dark"] .icon-red {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        [data-theme="dark"] .icon-blue {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+        🌙
+    </button>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>Expense Manager</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </button>
+                <button class="nav-item" data-page="projects">
+                    <span class="nav-icon">📁</span>
+                    Projects
+                </button>
+                <button class="nav-item" data-page="clients">
+                    <span class="nav-icon">👥</span>
+                    Clients
+                </button>
+                <button class="nav-item" data-page="expenses">
+                    <span class="nav-icon">🧾</span>
+                    Expenses
+                </button>
+                <button class="nav-item" data-page="payments">
+                    <span class="nav-icon">💳</span>
+                    Payments
+                </button>
+                <button class="nav-item" data-page="employees">
+                    <span class="nav-icon">👤</span>
+                    Employees
+                </button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="page-header">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Overview of your business finances</p>
+                </div>
+
+                <div class="grid grid-cols-4 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Income</span>
+                            <div class="stat-icon icon-green">💰</div>
+                        </div>
+                        <div class="stat-value stat-green" id="total-income">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Expenses</span>
+                            <div class="stat-icon icon-red">📉</div>
+                        </div>
+                        <div class="stat-value stat-red" id="total-expenses">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Net Profit</span>
+                            <div class="stat-icon icon-blue">📈</div>
+                        </div>
+                        <div class="stat-value stat-blue" id="net-profit">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Profit Margin</span>
+                            <div class="stat-icon icon-blue">📊</div>
+                        </div>
+                        <div class="stat-value stat-blue" id="profit-margin">0%</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Payments</h3>
+                        </div>
+                        <div id="recent-payments"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Expenses</h3>
+                        </div>
+                        <div id="recent-expenses"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Page -->
+            <div id="projects" class="page">
+                <div class="page-header flex justify-between items-center">
+                    <div>
+                        <h1 class="page-title">Projects</h1>
+                        <p class="page-subtitle">Manage your project status and timeline</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openProjectModal()">
+                        ➕ Add Project
+                    </button>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab-list">
+                        <button class="tab-button active" data-status="Current">Current</button>
+                        <button class="tab-button" data-status="Pending">Pending</button>
+                        <button class="tab-button" data-status="Complete">Complete</button>
+                        <button class="tab-button" data-status="Cancelled">Cancelled</button>
+                    </div>
+                    <div id="projects-content" class="grid grid-cols-3"></div>
+                </div>
+            </div>
+
+            <!-- Clients Page -->
+            <div id="clients" class="page">
+                <div class="page-header flex justify-between items-center">
+                    <div>
+                        <h1 class="page-title">Clients</h1>
+                        <p class="page-subtitle">Manage your client information and services</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openClientModal()">
+                        ➕ Add Client
+                    </button>
+                </div>
+                <div id="clients-content" class="grid grid-cols-3"></div>
+            </div>
+
+            <!-- Expenses Page -->
+            <div id="expenses" class="page">
+                <div class="page-header flex justify-between items-center">
+                    <div>
+                        <h1 class="page-title">Expenses</h1>
+                        <p class="page-subtitle">Track and categorize your business expenses</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openExpenseModal()">
+                        ➕ Add Expense
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 mb-4">
+                    <div class="card">
+                        <h3 class="card-title">Total Expenses</h3>
+                        <div class="stat-value stat-red" id="expenses-total">$0</div>
+                    </div>
+                    <div class="card" style="grid-column: span 2;">
+                        <h3 class="card-title">Expenses by Category</h3>
+                        <div id="expenses-by-category"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">All Expenses</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th class="text-right">Amount</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenses-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payments Page -->
+            <div id="payments" class="page">
+                <div class="page-header flex justify-between items-center">
+                    <div>
+                        <h1 class="page-title">Payments</h1>
+                        <p class="page-subtitle">Track client payments and payment status</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openPaymentModal()">
+                        ➕ Add Payment
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 mb-4">
+                    <div class="card">
+                        <h3 class="card-title">Total Paid</h3>
+                        <div class="stat-value stat-green" id="payments-paid">$0</div>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Total Pending</h3>
+                        <div class="stat-value stat-yellow" id="payments-pending">$0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">All Payments</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>Service</th>
+                                <th class="text-right">Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Employees Page -->
+            <div id="employees" class="page">
+                <div class="page-header flex justify-between items-center">
+                    <div>
+                        <h1 class="page-title">Employees</h1>
+                        <p class="page-subtitle">Manage employee information and client assignments</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openEmployeeModal()">
+                        ➕ Add Employee
+                    </button>
+                </div>
+                <div id="employees-content" class="grid grid-cols-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Client Modal -->
+    <div id="clientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="clientModalTitle">Add Client</h2>
+                <button class="close-btn" onclick="closeModal('clientModal')">&times;</button>
+            </div>
+            <form id="clientForm">
+                <div class="form-group">
+                    <label class="form-label">Client Name</label>
+                    <input type="text" class="form-input" id="clientName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" class="form-input" id="clientCompany" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="clientEmail" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" id="clientPhone" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <input type="text" class="form-input" id="clientAddress" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Service Name</label>
+                    <input type="text" class="form-input" id="clientService" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Service Cost ($)</label>
+                    <input type="number" class="form-input" id="clientCost" required>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save Client</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('clientModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="expenseModalTitle">Add Expense</h2>
+                <button class="close-btn" onclick="closeModal('expenseModal')">&times;</button>
+            </div>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="expenseDate" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-input" id="expenseDescription" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount ($)</label>
+                    <input type="number" step="0.01" class="form-input" id="expenseAmount" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="expenseCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Latency">Latency</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Office Supplies">Office Supplies</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save Expense</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="paymentModalTitle">Add Payment</h2>
+                <button class="close-btn" onclick="closeModal('paymentModal')">&times;</button>
+            </div>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label class="form-label">Client</label>
+                    <select class="form-select" id="paymentClient" required>
+                        <option value="">Select Client</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Service Name</label>
+                    <input type="text" class="form-input" id="paymentService" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Service Cost ($)</label>
+                    <input type="number" class="form-input" id="paymentCost" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Status</label>
+                    <select class="form-select" id="paymentStatus" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="paymentDate" required>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save Payment</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Employee Modal -->
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="employeeModalTitle">Add Employee</h2>
+                <button class="close-btn" onclick="closeModal('employeeModal')">&times;</button>
+            </div>
+            <form id="employeeForm">
+                <div class="form-group">
+                    <label class="form-label">Employee Name</label>
+                    <input type="text" class="form-input" id="employeeName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="employeeEmail" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Skills (comma separated)</label>
+                    <input type="text" class="form-input" id="employeeSkills" placeholder="React, Node.js, TypeScript">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Client Assignments</label>
+                    <div id="clientAssignments"></div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save Employee</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('employeeModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="projectModalTitle">Add Project</h2>
+                <button class="close-btn" onclick="closeModal('projectModal')">&times;</button>
+            </div>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label class="form-label">Client</label>
+                    <select class="form-select" id="projectClient" required>
+                        <option value="">Select Client</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Service Name</label>
+                    <input type="text" class="form-input" id="projectService" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="projectStatus" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Current">Current</option>
+                        <option value="Complete">Complete</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-input" id="projectStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Date</label>
+                    <input type="date" class="form-input" id="projectEndDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cost ($)</label>
+                    <input type="number" class="form-input" id="projectCost" required>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save Project</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeToggle(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeToggle(newTheme);
+        }
+
+        function updateThemeToggle(theme) {
+            const toggle = document.getElementById('themeToggle');
+            toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            toggle.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        }
+
+        // Data Storage
+        let clients = JSON.parse(localStorage.getItem('clients')) || [
+            {
+                id: '1',
+                name: 'John Smith',
+                company: 'Tech Solutions Inc',
+                email: 'john@techsolutions.com',
+                phone: '+1 234 567 8900',
+                address: '123 Business Ave, New York, NY',
+                serviceName: 'Web Development',
+                serviceCost: 5000
+            },
+            {
+                id: '2',
+                name: 'Sarah Johnson',
+                company: 'Marketing Pro',
+                email: 'sarah@marketingpro.com',
+                phone: '+1 234 567 8901',
+                address: '456 Commerce St, Los Angeles, CA',
+                serviceName: 'Digital Marketing',
+                serviceCost: 3000
+            }
+        ];
+
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [
+            {
+                id: '1',
+                date: '2024-01-15',
+                description: 'Server hosting costs',
+                amount: 150,
+                category: 'Maintenance'
+            },
+            {
+                id: '2',
+                date: '2024-01-20',
+                description: 'Software licenses',
+                amount: 300,
+                category: 'Tools'
+            },
+            {
+                id: '3',
+                date: '2024-01-25',
+                description: 'Internet connectivity issues',
+                amount: 200,
+                category: 'Latency'
+            }
+        ];
+
+        let payments = JSON.parse(localStorage.getItem('payments')) || [
+            {
+                id: '1',
+                clientId: '1',
+                clientName: 'John Smith',
+                serviceName: 'Web Development',
+                serviceCost: 5000,
+                status: 'Paid',
+                date: '2024-01-10'
+            },
+            {
+                id: '2',
+                clientId: '2',
+                clientName: 'Sarah Johnson',
+                serviceName: 'Digital Marketing',
+                serviceCost: 3000,
+                status: 'Pending',
+                date: '2024-01-20'
+            }
+        ];
+
+        let employees = JSON.parse(localStorage.getItem('employees')) || [
+            {
+                id: '1',
+                name: 'Alice Cooper',
+                email: 'alice@company.com',
+                skills: ['React', 'Node.js', 'TypeScript'],
+                clientAssignments: ['Tech Solutions Inc', 'Marketing Pro']
+            },
+            {
+                id: '2',
+                name: 'Bob Wilson',
+                email: 'bob@company.com',
+                skills: ['Design', 'UI/UX', 'Figma'],
+                clientAssignments: ['Tech Solutions Inc']
+            }
+        ];
+
+        let projects = JSON.parse(localStorage.getItem('projects')) || [
+            {
+                id: '1',
+                clientId: '1',
+                clientName: 'John Smith',
+                serviceName: 'Web Development',
+                status: 'Current',
+                startDate: '2024-01-01',
+                endDate: '',
+                cost: 5000
+            },
+            {
+                id: '2',
+                clientId: '2',
+                clientName: 'Sarah Johnson',
+                serviceName: 'Digital Marketing',
+                status: 'Pending',
+                startDate: '2024-02-01',
+                endDate: '',
+                cost: 3000
+            }
+        ];
+
+        let editingId = null;
+        let currentProjectStatus = 'Current';
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('clients', JSON.stringify(clients));
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            localStorage.setItem('payments', JSON.stringify(payments));
+            localStorage.setItem('employees', JSON.stringify(employees));
+            localStorage.setItem('projects', JSON.stringify(projects));
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                showPage(page);
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            // Render page content
+            switch(pageId) {
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'clients':
+                    renderClients();
+                    break;
+                case 'expenses':
+                    renderExpenses();
+                    break;
+                case 'payments':
+                    renderPayments();
+                    break;
+                case 'employees':
+                    renderEmployees();
+                    break;
+                case 'projects':
+                    renderProjects();
+                    break;
+            }
+        }
+
+        // Dashboard
+        function renderDashboard() {
+            const totalIncome = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.serviceCost, 0);
+            const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+            const netProfit = totalIncome - totalExpenses;
+            const profitMargin = totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(1) : '0';
+
+            document.getElementById('total-income').textContent = `$${totalIncome.toLocaleString()}`;
+            document.getElementById('total-expenses').textContent = `$${totalExpenses.toLocaleString()}`;
+            document.getElementById('net-profit').textContent = `$${netProfit.toLocaleString()}`;
+            document.getElementById('profit-margin').textContent = `${profitMargin}%`;
+
+            // Recent payments
+            const recentPayments = payments.slice(0, 5).map(payment => `
+                <div class="flex justify-between items-center mb-2">
+                    <div>
+                        <div class="font-medium">${payment.clientName}</div>
+                        <div class="text-sm text-gray-600">${payment.serviceName}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-medium">$${payment.serviceCost.toLocaleString()}</div>
+                        <span class="badge ${payment.status === 'Paid' ? 'badge-green' : 'badge-yellow'}">${payment.status}</span>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('recent-payments').innerHTML = recentPayments;
+
+            // Recent expenses
+            const recentExpenses = expenses.slice(0, 5).map(expense => `
+                <div class="flex justify-between items-center mb-2">
+                    <div>
+                        <div class="font-medium">${expense.description}</div>
+                        <div class="text-sm text-gray-600">${expense.category}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-medium text-red-600">-$${expense.amount.toLocaleString()}</div>
+                        <div class="text-xs text-gray-500">${expense.date}</div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('recent-expenses').innerHTML = recentExpenses;
+        }
+
+        // Clients
+        function renderClients() {
+            const clientsHtml = clients.map(client => `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="font-semibold">${client.name}</h3>
+                            <p class="text-sm text-gray-600">${client.company}</p>
+                        </div>
+                        <div class="flex gap-1">
+                            <button class="btn btn-sm btn-secondary" onclick="editClient('${client.id}')">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteClient('${client.id}')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="text-sm space-y-1">
+                        <div><strong>Email:</strong> ${client.email}</div>
+                        <div><strong>Phone:</strong> ${client.phone}</div>
+                        <div><strong>Address:</strong> ${client.address}</div>
+                        <div><strong>Service:</strong> ${client.serviceName}</div>
+                        <div><strong>Cost:</strong> $${client.serviceCost.toLocaleString()}</div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('clients-content').innerHTML = clientsHtml;
+        }
+
+        // Expenses
+        function renderExpenses() {
+            const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+            document.getElementById('expenses-total').textContent = `$${totalExpenses.toLocaleString()}`;
+
+            // Expenses by category
+            const expensesByCategory = expenses.reduce((acc, expense) => {
+                acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
+                return acc;
+            }, {});
+
+            const categoriesHtml = Object.entries(expensesByCategory).map(([category, amount]) => `
+                <div class="flex justify-between">
+                    <span class="text-gray-600">${category}:</span>
+                    <span class="font-medium">$${amount.toLocaleString()}</span>
+                </div>
+            `).join('');
+            document.getElementById('expenses-by-category').innerHTML = categoriesHtml;
+
+            // Expenses table
+            const expensesTableHtml = expenses.map(expense => `
+                <tr>
+                    <td>${expense.date}</td>
+                    <td>${expense.description}</td>
+                    <td><span class="badge badge-gray">${expense.category}</span></td>
+                    <td class="text-right font-medium">$${expense.amount.toLocaleString()}</td>
+                    <td class="text-right">
+                        <button class="btn btn-sm btn-secondary" onclick="editExpense('${expense.id}')">✏️</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteExpense('${expense.id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('expenses-table').innerHTML = expensesTableHtml;
+        }
+
+        // Payments
+        function renderPayments() {
+            const totalPaid = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.serviceCost, 0);
+            const totalPending = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.serviceCost, 0);
+
+            document.getElementById('payments-paid').textContent = `$${totalPaid.toLocaleString()}`;
+            document.getElementById('payments-pending').textContent = `$${totalPending.toLocaleString()}`;
+
+            const paymentsTableHtml = payments.map(payment => `
+                <tr>
+                    <td>${payment.clientName}</td>
+                    <td>${payment.serviceName}</td>
+                    <td class="text-right font-medium">$${payment.serviceCost.toLocaleString()}</td>
+                    <td><span class="badge ${payment.status === 'Paid' ? 'badge-green' : 'badge-yellow'}">${payment.status}</span></td>
+                    <td>${payment.date}</td>
+                    <td class="text-right">
+                        <button class="btn btn-sm btn-secondary" onclick="editPayment('${payment.id}')">✏️</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePayment('${payment.id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('payments-table').innerHTML = paymentsTableHtml;
+        }
+
+        // Employees
+        function renderEmployees() {
+            const employeesHtml = employees.map(employee => `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="font-semibold">${employee.name}</h3>
+                            <p class="text-sm text-gray-600">${employee.email}</p>
+                        </div>
+                        <div class="flex gap-1">
+                            <button class="btn btn-sm btn-secondary" onclick="editEmployee('${employee.id}')">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteEmployee('${employee.id}')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <h4 class="font-medium text-sm mb-2">Skills:</h4>
+                            <div class="flex flex-wrap gap-1">
+                                ${employee.skills.map(skill => `<span class="badge badge-blue">${skill}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-sm mb-2">Client Assignments:</h4>
+                            <div class="space-y-1">
+                                ${employee.clientAssignments.map(assignment => `<div class="text-sm text-gray-600">• ${assignment}</div>`).join('')}
+                                ${employee.clientAssignments.length === 0 ? '<div class="text-sm text-gray-400">No assignments</div>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('employees-content').innerHTML = employeesHtml;
+        }
+
+        // Projects
+        function renderProjects() {
+            // Setup tab functionality
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                    button.classList.add('active');
+                    currentProjectStatus = button.dataset.status;
+                    renderProjectsContent();
+                });
+            });
+            renderProjectsContent();
+        }
+
+        function renderProjectsContent() {
+            const filteredProjects = projects.filter(project => project.status === currentProjectStatus);
+            
+            const projectsHtml = filteredProjects.map(project => `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="font-semibold">${project.serviceName}</h3>
+                            <p class="text-sm text-gray-600">${project.clientName}</p>
+                        </div>
+                        <span class="badge ${getStatusBadgeClass(project.status)}">${project.status}</span>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Start Date:</span>
+                            <span>${project.startDate}</span>
+                        </div>
+                        ${project.endDate ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">End Date:</span>
+                                <span>${project.endDate}</span>
+                            </div>
+                        ` : ''}
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Cost:</span>
+                            <span class="font-medium">$${project.cost.toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button class="btn btn-sm btn-secondary" onclick="editProject('${project.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteProject('${project.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('projects-content').innerHTML = projectsHtml || '<div class="text-center py-8 text-gray-500">No projects found</div>';
+        }
+
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'Current': return 'badge-blue';
+                case 'Pending': return 'badge-yellow';
+                case 'Complete': return 'badge-green';
+                case 'Cancelled': return 'badge-red';
+                default: return 'badge-gray';
+            }
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            editingId = null;
+            // Reset forms
+            document.querySelectorAll('form').forEach(form => form.reset());
+        }
+
+        function openClientModal() {
+            populateClientSelect();
+            openModal('clientModal');
+        }
+
+        function openExpenseModal() {
+            openModal('expenseModal');
+        }
+
+        function openPaymentModal() {
+            populatePaymentClientSelect();
+            openModal('paymentModal');
+        }
+
+        function openEmployeeModal() {
+            populateEmployeeClientAssignments();
+            openModal('employeeModal');
+        }
+
+        function openProjectModal() {
+            populateProjectClientSelect();
+            openModal('projectModal');
+        }
+
+        // Populate select options
+        function populateClientSelect() {
+            const select = document.getElementById('paymentClient');
+            select.innerHTML = '<option value="">Select Client</option>' + 
+                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('');
+        }
+
+        function populatePaymentClientSelect() {
+            const select = document.getElementById('paymentClient');
+            select.innerHTML = '<option value="">Select Client</option>' + 
+                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('');
+            
+            select.addEventListener('change', function() {
+                const selectedClient = clients.find(c => c.id === this.value);
+                if (selectedClient) {
+                    document.getElementById('paymentService').value = selectedClient.serviceName;
+                    document.getElementById('paymentCost').value = selectedClient.serviceCost;
+                }
+            });
+        }
+
+        function populateProjectClientSelect() {
+            const select = document.getElementById('projectClient');
+            select.innerHTML = '<option value="">Select Client</option>' + 
+                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('');
+            
+            select.addEventListener('change', function() {
+                const selectedClient = clients.find(c => c.id === this.value);
+                if (selectedClient) {
+                    document.getElementById('projectService').value = selectedClient.serviceName;
+                    document.getElementById('projectCost').value = selectedClient.serviceCost;
+                }
+            });
+        }
+
+        function populateEmployeeClientAssignments() {
+            const container = document.getElementById('clientAssignments');
+            container.innerHTML = clients.map(client => `
+                <label class="flex items-center space-x-2 mb-2">
+                    <input type="checkbox" value="${client.company}" name="clientAssignment">
+                    <span>${client.company} (${client.name})</span>
+                </label>
+            `).join('');
+        }
+
+        // Form submissions
+        document.getElementById('clientForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const clientData = {
+                id: editingId || Date.now().toString(),
+                name: document.getElementById('clientName').value,
+                company: document.getElementById('clientCompany').value,
+                email: document.getElementById('clientEmail').value,
+                phone: document.getElementById('clientPhone').value,
+                address: document.getElementById('clientAddress').value,
+                serviceName: document.getElementById('clientService').value,
+                serviceCost: parseFloat(document.getElementById('clientCost').value)
+            };
+
+            if (editingId) {
+                const index = clients.findIndex(c => c.id === editingId);
+                clients[index] = clientData;
+            } else {
+                clients.push(clientData);
+            }
+
+            saveData();
+            renderClients();
+            closeModal('clientModal');
+        });
+
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const expenseData = {
+                id: editingId || Date.now().toString(),
+                date: document.getElementById('expenseDate').value,
+                description: document.getElementById('expenseDescription').value,
+                amount: parseFloat(document.getElementById('expenseAmount').value),
+                category: document.getElementById('expenseCategory').value
+            };
+
+            if (editingId) {
+                const index = expenses.findIndex(e => e.id === editingId);
+                expenses[index] = expenseData;
+            } else {
+                expenses.push(expenseData);
+            }
+
+            saveData();
+            renderExpenses();
+            closeModal('expenseModal');
+        });
+
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const clientId = document.getElementById('paymentClient').value;
+            const selectedClient = clients.find(c => c.id === clientId);
+            
+            const paymentData = {
+                id: editingId || Date.now().toString(),
+                clientId: clientId,
+                clientName: selectedClient ? selectedClient.name : '',
+                serviceName: document.getElementById('paymentService').value,
+                serviceCost: parseFloat(document.getElementById('paymentCost').value),
+                status: document.getElementById('paymentStatus').value,
+                date: document.getElementById('paymentDate').value
+            };
+
+            if (editingId) {
+                const index = payments.findIndex(p => p.id === editingId);
+                payments[index] = paymentData;
+            } else {
+                payments.push(paymentData);
+            }
+
+            saveData();
+            renderPayments();
+            closeModal('paymentModal');
+        });
+
+        document.getElementById('employeeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const skills = document.getElementById('employeeSkills').value
+                .split(',')
+                .map(skill => skill.trim())
+                .filter(skill => skill);
+            
+            const assignments = Array.from(document.querySelectorAll('input[name="clientAssignment"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            const employeeData = {
+                id: editingId || Date.now().toString(),
+                name: document.getElementById('employeeName').value,
+                email: document.getElementById('employeeEmail').value,
+                skills: skills,
+                clientAssignments: assignments
+            };
+
+            if (editingId) {
+                const index = employees.findIndex(e => e.id === editingId);
+                employees[index] = employeeData;
+            } else {
+                employees.push(employeeData);
+            }
+
+            saveData();
+            renderEmployees();
+            closeModal('employeeModal');
+        });
+
+        document.getElementById('projectForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const clientId = document.getElementById('projectClient').value;
+            const selectedClient = clients.find(c => c.id === clientId);
+            
+            const projectData = {
+                id: editingId || Date.now().toString(),
+                clientId: clientId,
+                clientName: selectedClient ? selectedClient.name : '',
+                serviceName: document.getElementById('projectService').value,
+                status: document.getElementById('projectStatus').value,
+                startDate: document.getElementById('projectStartDate').value,
+                endDate: document.getElementById('projectEndDate').value,
+                cost: parseFloat(document.getElementById('projectCost').value)
+            };
+
+            if (editingId) {
+                const index = projects.findIndex(p => p.id === editingId);
+                projects[index] = projectData;
+            } else {
+                projects.push(projectData);
+            }
+
+            saveData();
+            renderProjects();
+            closeModal('projectModal');
+        });
+
+        // Edit functions
+        function editClient(id) {
+            const client = clients.find(c => c.id === id);
+            if (client) {
+                editingId = id;
+                document.getElementById('clientModalTitle').textContent = 'Edit Client';
+                document.getElementById('clientName').value = client.name;
+                document.getElementById('clientCompany').value = client.company;
+                document.getElementById('clientEmail').value = client.email;
+                document.getElementById('clientPhone').value = client.phone;
+                document.getElementById('clientAddress').value = client.address;
+                document.getElementById('clientService').value = client.serviceName;
+                document.getElementById('clientCost').value = client.serviceCost;
+                openClientModal();
+            }
+        }
+
+        function editExpense(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (expense) {
+                editingId = id;
+                document.getElementById('expenseModalTitle').textContent = 'Edit Expense';
+                document.getElementById('expenseDate').value = expense.date;
+                document.getElementById('expenseDescription').value = expense.description;
+                document.getElementById('expenseAmount').value = expense.amount;
+                document.getElementById('expenseCategory').value = expense.category;
+                openExpenseModal();
+            }
+        }
+
+        function editPayment(id) {
+            const payment = payments.find(p => p.id === id);
+            if (payment) {
+                editingId = id;
+                document.getElementById('paymentModalTitle').textContent = 'Edit Payment';
+                populatePaymentClientSelect();
+                document.getElementById('paymentClient').value = payment.clientId;
+                document.getElementById('paymentService').value = payment.serviceName;
+                document.getElementById('paymentCost').value = payment.serviceCost;
+                document.getElementById('paymentStatus').value = payment.status;
+                document.getElementById('paymentDate').value = payment.date;
+                openPaymentModal();
+            }
+        }
+
+        function editEmployee(id) {
+            const employee = employees.find(e => e.id === id);
+            if (employee) {
+                editingId = id;
+                document.getElementById('employeeModalTitle').textContent = 'Edit Employee';
+                document.getElementById('employeeName').value = employee.name;
+                document.getElementById('employeeEmail').value = employee.email;
+                document.getElementById('employeeSkills').value = employee.skills.join(', ');
+                populateEmployeeClientAssignments();
+                // Check assigned clients
+                setTimeout(() => {
+                    employee.clientAssignments.forEach(assignment => {
+                        const checkbox = document.querySelector(`input[value="${assignment}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }, 100);
+                openEmployeeModal();
+            }
+        }
+
+        function editProject(id) {
+            const project = projects.find(p => p.id === id);
+            if (project) {
+                editingId = id;
+                document.getElementById('projectModalTitle').textContent = 'Edit Project';
+                populateProjectClientSelect();
+                document.getElementById('projectClient').value = project.clientId;
+                document.getElementById('projectService').value = project.serviceName;
+                document.getElementById('projectStatus').value = project.status;
+                document.getElementById('projectStartDate').value = project.startDate;
+                document.getElementById('projectEndDate').value = project.endDate;
+                document.getElementById('projectCost').value = project.cost;
+                openProjectModal();
+            }
+        }
+
+        // Delete functions
+        function deleteClient(id) {
+            if (confirm('Are you sure you want to delete this client?')) {
+                clients = clients.filter(c => c.id !== id);
+                saveData();
+                renderClients();
+            }
+        }
+
+        function deleteExpense(id) {
+            if (confirm('Are you sure you want to delete this expense?')) {
+                expenses = expenses.filter(e => e.id !== id);
+                saveData();
+                renderExpenses();
+            }
+        }
+
+        function deletePayment(id) {
+            if (confirm('Are you sure you want to delete this payment?')) {
+                payments = payments.filter(p => p.id !== id);
+                saveData();
+                renderPayments();
+            }
+        }
+
+        function deleteEmployee(id) {
+            if (confirm('Are you sure you want to delete this employee?')) {
+                employees = employees.filter(e => e.id !== id);
+                saveData();
+                renderEmployees();
+            }
+        }
+
+        function deleteProject(id) {
+            if (confirm('Are you sure you want to delete this project?')) {
+                projects = projects.filter(p => p.id !== id);
+                saveData();
+                renderProjects();
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            renderDashboard();
+        });
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
