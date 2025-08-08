@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expenses Management System</title>
+    
+     Supabase CDN 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         :root {
             /* Light theme colors */
@@ -83,6 +87,36 @@
         .container {
             display: flex;
             min-height: 100vh;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            font-size: 18px;
         }
 
         /* Theme Toggle Button */
@@ -173,7 +207,7 @@
             flex: 1;
             padding: 2rem;
             overflow-y: auto;
-            padding-top: 80px; /* Space for theme toggle */
+            padding-top: 80px;
         }
 
         .page {
@@ -253,12 +287,17 @@
             transition: all 0.2s;
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .btn-primary {
             background-color: var(--accent-blue);
             color: white;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background-color: var(--accent-blue-hover);
         }
 
@@ -268,7 +307,7 @@
             border: 1px solid var(--border-color);
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
             background-color: var(--border-color);
             color: var(--text-primary);
         }
@@ -278,7 +317,7 @@
             color: white;
         }
 
-        .btn-danger:hover {
+        .btn-danger:hover:not(:disabled) {
             background-color: #b91c1c;
         }
 
@@ -639,13 +678,21 @@
     </style>
 </head>
 <body>
-    <!-- Theme Toggle Button -->
+     Loading Overlay 
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div>
+            <div class="loading"></div>
+            <div style="margin-top: 10px;">Loading...</div>
+        </div>
+    </div>
+
+     Theme Toggle Button 
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
         🌙
     </button>
 
     <div class="container">
-        <!-- Sidebar -->
+         Sidebar 
         <div class="sidebar">
             <div class="sidebar-header">
                 <h1>Expense Manager</h1>
@@ -678,9 +725,9 @@
             </nav>
         </div>
 
-        <!-- Main Content -->
+         Main Content 
         <div class="main-content">
-            <!-- Dashboard Page -->
+             Dashboard Page 
             <div id="dashboard" class="page active">
                 <div class="page-header">
                     <h1 class="page-title">Dashboard</h1>
@@ -734,7 +781,7 @@
                 </div>
             </div>
 
-            <!-- Projects Page -->
+             Projects Page 
             <div id="projects" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -757,7 +804,7 @@
                 </div>
             </div>
 
-            <!-- Clients Page -->
+             Clients Page 
             <div id="clients" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -771,7 +818,7 @@
                 <div id="clients-content" class="grid grid-cols-3"></div>
             </div>
 
-            <!-- Expenses Page -->
+             Expenses Page 
             <div id="expenses" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -811,7 +858,7 @@
                 </div>
             </div>
 
-            <!-- Payments Page -->
+             Payments Page 
             <div id="payments" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -852,7 +899,7 @@
                 </div>
             </div>
 
-            <!-- Employees Page -->
+             Employees Page 
             <div id="employees" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -868,8 +915,8 @@
         </div>
     </div>
 
-    <!-- Modals -->
-    <!-- Client Modal -->
+     Modals 
+     Client Modal 
     <div id="clientModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -906,14 +953,17 @@
                     <input type="number" class="form-input" id="clientCost" required>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary">Save Client</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Save Client</span>
+                        <div class="loading hidden"></div>
+                    </button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('clientModal')">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Expense Modal -->
+     Expense Modal 
     <div id="expenseModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -948,14 +998,17 @@
                     </select>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary">Save Expense</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Save Expense</span>
+                        <div class="loading hidden"></div>
+                    </button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Payment Modal -->
+     Payment Modal 
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -989,14 +1042,17 @@
                     <input type="date" class="form-input" id="paymentDate" required>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary">Save Payment</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Save Payment</span>
+                        <div class="loading hidden"></div>
+                    </button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Employee Modal -->
+     Employee Modal 
     <div id="employeeModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1021,14 +1077,17 @@
                     <div id="clientAssignments"></div>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary">Save Employee</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Save Employee</span>
+                        <div class="loading hidden"></div>
+                    </button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('employeeModal')">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Project Modal -->
+     Project Modal 
     <div id="projectModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1068,7 +1127,10 @@
                     <input type="number" class="form-input" id="projectCost" required>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary">Save Project</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Save Project</span>
+                        <div class="loading hidden"></div>
+                    </button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
                 </div>
             </form>
@@ -1076,199 +1138,212 @@
     </div>
 
     <script>
-        // Theme Management
+        // ===== SUPABASE CONFIGURATION =====
+        // Replace these with your actual Supabase credentials
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'
+        
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        // ===== GLOBAL VARIABLES =====
+        let clients = []
+        let expenses = []
+        let payments = []
+        let employees = []
+        let projects = []
+        let editingId = null
+        let currentProjectStatus = 'Current'
+
+        // ===== UTILITY FUNCTIONS =====
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden')
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden')
+        }
+
+        function showButtonLoading(button) {
+            const btnText = button.querySelector('.btn-text')
+            const loading = button.querySelector('.loading')
+            if (btnText) btnText.classList.add('hidden')
+            if (loading) loading.classList.remove('hidden')
+            button.disabled = true
+        }
+
+        function hideButtonLoading(button) {
+            const btnText = button.querySelector('.btn-text')
+            const loading = button.querySelector('.loading')
+            if (btnText) btnText.classList.remove('hidden')
+            if (loading) loading.classList.add('hidden')
+            button.disabled = false
+        }
+
+        function showError(message) {
+            alert('Error: ' + message)
+        }
+
+        function showSuccess(message) {
+            // You can replace this with a toast notification
+            console.log('Success: ' + message)
+        }
+
+        // ===== DATABASE FUNCTIONS =====
+        async function loadAllData() {
+            showLoading()
+            try {
+                // Load all data in parallel
+                const [clientsRes, expensesRes, paymentsRes, employeesRes, projectsRes] = await Promise.all([
+                    supabase.from('clients').select('*').order('created_at', { ascending: false }),
+                    supabase.from('expenses').select('*').order('created_at', { ascending: false }),
+                    supabase.from('payments').select('*').order('created_at', { ascending: false }),
+                    supabase.from('employees').select('*').order('created_at', { ascending: false }),
+                    supabase.from('projects').select('*').order('created_at', { ascending: false })
+                ])
+
+                if (clientsRes.error) throw clientsRes.error
+                if (expensesRes.error) throw expensesRes.error
+                if (paymentsRes.error) throw paymentsRes.error
+                if (employeesRes.error) throw employeesRes.error
+                if (projectsRes.error) throw projectsRes.error
+
+                clients = clientsRes.data || []
+                expenses = expensesRes.data || []
+                payments = paymentsRes.data || []
+                employees = employeesRes.data || []
+                projects = projectsRes.data || []
+
+                // Convert database format to app format
+                clients = clients.map(client => ({
+                    id: client.id,
+                    name: client.name,
+                    company: client.company,
+                    email: client.email,
+                    phone: client.phone,
+                    address: client.address,
+                    serviceName: client.service_name,
+                    serviceCost: parseFloat(client.service_cost)
+                }))
+
+                expenses = expenses.map(expense => ({
+                    id: expense.id,
+                    date: expense.date,
+                    description: expense.description,
+                    amount: parseFloat(expense.amount),
+                    category: expense.category
+                }))
+
+                payments = payments.map(payment => ({
+                    id: payment.id,
+                    clientId: payment.client_id,
+                    clientName: payment.client_name,
+                    serviceName: payment.service_name,
+                    serviceCost: parseFloat(payment.service_cost),
+                    status: payment.status,
+                    date: payment.date
+                }))
+
+                employees = employees.map(employee => ({
+                    id: employee.id,
+                    name: employee.name,
+                    email: employee.email,
+                    skills: employee.skills || [],
+                    clientAssignments: employee.client_assignments || []
+                }))
+
+                projects = projects.map(project => ({
+                    id: project.id,
+                    clientId: project.client_id,
+                    clientName: project.client_name,
+                    serviceName: project.service_name,
+                    status: project.status,
+                    startDate: project.start_date,
+                    endDate: project.end_date,
+                    cost: parseFloat(project.cost)
+                }))
+
+                showSuccess('Data loaded successfully')
+            } catch (error) {
+                console.error('Error loading data:', error)
+                showError('Failed to load data: ' + error.message)
+            } finally {
+                hideLoading()
+            }
+        }
+
+        // ===== THEME MANAGEMENT =====
         function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeToggle(savedTheme);
+            const savedTheme = localStorage.getItem('theme') || 'light'
+            document.documentElement.setAttribute('data-theme', savedTheme)
+            updateThemeToggle(savedTheme)
         }
 
         function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const currentTheme = document.documentElement.getAttribute('data-theme')
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
             
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeToggle(newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme)
+            localStorage.setItem('theme', newTheme)
+            updateThemeToggle(newTheme)
         }
 
         function updateThemeToggle(theme) {
-            const toggle = document.getElementById('themeToggle');
-            toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
-            toggle.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            const toggle = document.getElementById('themeToggle')
+            toggle.textContent = theme === 'dark' ? '☀️' : '🌙'
+            toggle.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'
         }
 
-        // Data Storage
-        let clients = JSON.parse(localStorage.getItem('clients')) || [
-            {
-                id: '1',
-                name: 'John Smith',
-                company: 'Tech Solutions Inc',
-                email: 'john@techsolutions.com',
-                phone: '+1 234 567 8900',
-                address: '123 Business Ave, New York, NY',
-                serviceName: 'Web Development',
-                serviceCost: 5000
-            },
-            {
-                id: '2',
-                name: 'Sarah Johnson',
-                company: 'Marketing Pro',
-                email: 'sarah@marketingpro.com',
-                phone: '+1 234 567 8901',
-                address: '456 Commerce St, Los Angeles, CA',
-                serviceName: 'Digital Marketing',
-                serviceCost: 3000
-            }
-        ];
-
-        let expenses = JSON.parse(localStorage.getItem('expenses')) || [
-            {
-                id: '1',
-                date: '2024-01-15',
-                description: 'Server hosting costs',
-                amount: 150,
-                category: 'Maintenance'
-            },
-            {
-                id: '2',
-                date: '2024-01-20',
-                description: 'Software licenses',
-                amount: 300,
-                category: 'Tools'
-            },
-            {
-                id: '3',
-                date: '2024-01-25',
-                description: 'Internet connectivity issues',
-                amount: 200,
-                category: 'Latency'
-            }
-        ];
-
-        let payments = JSON.parse(localStorage.getItem('payments')) || [
-            {
-                id: '1',
-                clientId: '1',
-                clientName: 'John Smith',
-                serviceName: 'Web Development',
-                serviceCost: 5000,
-                status: 'Paid',
-                date: '2024-01-10'
-            },
-            {
-                id: '2',
-                clientId: '2',
-                clientName: 'Sarah Johnson',
-                serviceName: 'Digital Marketing',
-                serviceCost: 3000,
-                status: 'Pending',
-                date: '2024-01-20'
-            }
-        ];
-
-        let employees = JSON.parse(localStorage.getItem('employees')) || [
-            {
-                id: '1',
-                name: 'Alice Cooper',
-                email: 'alice@company.com',
-                skills: ['React', 'Node.js', 'TypeScript'],
-                clientAssignments: ['Tech Solutions Inc', 'Marketing Pro']
-            },
-            {
-                id: '2',
-                name: 'Bob Wilson',
-                email: 'bob@company.com',
-                skills: ['Design', 'UI/UX', 'Figma'],
-                clientAssignments: ['Tech Solutions Inc']
-            }
-        ];
-
-        let projects = JSON.parse(localStorage.getItem('projects')) || [
-            {
-                id: '1',
-                clientId: '1',
-                clientName: 'John Smith',
-                serviceName: 'Web Development',
-                status: 'Current',
-                startDate: '2024-01-01',
-                endDate: '',
-                cost: 5000
-            },
-            {
-                id: '2',
-                clientId: '2',
-                clientName: 'Sarah Johnson',
-                serviceName: 'Digital Marketing',
-                status: 'Pending',
-                startDate: '2024-02-01',
-                endDate: '',
-                cost: 3000
-            }
-        ];
-
-        let editingId = null;
-        let currentProjectStatus = 'Current';
-
-        // Save data to localStorage
-        function saveData() {
-            localStorage.setItem('clients', JSON.stringify(clients));
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            localStorage.setItem('payments', JSON.stringify(payments));
-            localStorage.setItem('employees', JSON.stringify(employees));
-            localStorage.setItem('projects', JSON.stringify(projects));
-        }
-
-        // Navigation
+        // ===== NAVIGATION =====
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
-                const page = item.dataset.page;
-                showPage(page);
+                const page = item.dataset.page
+                showPage(page)
                 
                 // Update active nav item
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
-            });
-        });
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'))
+                item.classList.add('active')
+            })
+        })
 
         function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'))
+            document.getElementById(pageId).classList.add('active')
             
             // Render page content
             switch(pageId) {
                 case 'dashboard':
-                    renderDashboard();
-                    break;
+                    renderDashboard()
+                    break
                 case 'clients':
-                    renderClients();
-                    break;
+                    renderClients()
+                    break
                 case 'expenses':
-                    renderExpenses();
-                    break;
+                    renderExpenses()
+                    break
                 case 'payments':
-                    renderPayments();
-                    break;
+                    renderPayments()
+                    break
                 case 'employees':
-                    renderEmployees();
-                    break;
+                    renderEmployees()
+                    break
                 case 'projects':
-                    renderProjects();
-                    break;
+                    renderProjects()
+                    break
             }
         }
 
-        // Dashboard
+        // ===== RENDER FUNCTIONS =====
         function renderDashboard() {
-            const totalIncome = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.serviceCost, 0);
-            const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-            const netProfit = totalIncome - totalExpenses;
-            const profitMargin = totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(1) : '0';
+            const totalIncome = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.serviceCost, 0)
+            const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
+            const netProfit = totalIncome - totalExpenses
+            const profitMargin = totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(1) : '0'
 
-            document.getElementById('total-income').textContent = `$${totalIncome.toLocaleString()}`;
-            document.getElementById('total-expenses').textContent = `$${totalExpenses.toLocaleString()}`;
-            document.getElementById('net-profit').textContent = `$${netProfit.toLocaleString()}`;
-            document.getElementById('profit-margin').textContent = `${profitMargin}%`;
+            document.getElementById('total-income').textContent = `$${totalIncome.toLocaleString()}`
+            document.getElementById('total-expenses').textContent = `$${totalExpenses.toLocaleString()}`
+            document.getElementById('net-profit').textContent = `$${netProfit.toLocaleString()}`
+            document.getElementById('profit-margin').textContent = `${profitMargin}%`
 
             // Recent payments
             const recentPayments = payments.slice(0, 5).map(payment => `
@@ -1282,8 +1357,8 @@
                         <span class="badge ${payment.status === 'Paid' ? 'badge-green' : 'badge-yellow'}">${payment.status}</span>
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('recent-payments').innerHTML = recentPayments;
+            `).join('')
+            document.getElementById('recent-payments').innerHTML = recentPayments
 
             // Recent expenses
             const recentExpenses = expenses.slice(0, 5).map(expense => `
@@ -1297,11 +1372,10 @@
                         <div class="text-xs text-gray-500">${expense.date}</div>
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('recent-expenses').innerHTML = recentExpenses;
+            `).join('')
+            document.getElementById('recent-expenses').innerHTML = recentExpenses
         }
 
-        // Clients
         function renderClients() {
             const clientsHtml = clients.map(client => `
                 <div class="card">
@@ -1323,28 +1397,27 @@
                         <div><strong>Cost:</strong> $${client.serviceCost.toLocaleString()}</div>
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('clients-content').innerHTML = clientsHtml;
+            `).join('')
+            document.getElementById('clients-content').innerHTML = clientsHtml
         }
 
-        // Expenses
         function renderExpenses() {
-            const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-            document.getElementById('expenses-total').textContent = `$${totalExpenses.toLocaleString()}`;
+            const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
+            document.getElementById('expenses-total').textContent = `$${totalExpenses.toLocaleString()}`
 
             // Expenses by category
             const expensesByCategory = expenses.reduce((acc, expense) => {
-                acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
-                return acc;
-            }, {});
+                acc[expense.category] = (acc[expense.category] || 0) + expense.amount
+                return acc
+            }, {})
 
             const categoriesHtml = Object.entries(expensesByCategory).map(([category, amount]) => `
                 <div class="flex justify-between">
                     <span class="text-gray-600">${category}:</span>
                     <span class="font-medium">$${amount.toLocaleString()}</span>
                 </div>
-            `).join('');
-            document.getElementById('expenses-by-category').innerHTML = categoriesHtml;
+            `).join('')
+            document.getElementById('expenses-by-category').innerHTML = categoriesHtml
 
             // Expenses table
             const expensesTableHtml = expenses.map(expense => `
@@ -1358,17 +1431,16 @@
                         <button class="btn btn-sm btn-danger" onclick="deleteExpense('${expense.id}')">🗑️</button>
                     </td>
                 </tr>
-            `).join('');
-            document.getElementById('expenses-table').innerHTML = expensesTableHtml;
+            `).join('')
+            document.getElementById('expenses-table').innerHTML = expensesTableHtml
         }
 
-        // Payments
         function renderPayments() {
-            const totalPaid = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.serviceCost, 0);
-            const totalPending = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.serviceCost, 0);
+            const totalPaid = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.serviceCost, 0)
+            const totalPending = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.serviceCost, 0)
 
-            document.getElementById('payments-paid').textContent = `$${totalPaid.toLocaleString()}`;
-            document.getElementById('payments-pending').textContent = `$${totalPending.toLocaleString()}`;
+            document.getElementById('payments-paid').textContent = `$${totalPaid.toLocaleString()}`
+            document.getElementById('payments-pending').textContent = `$${totalPending.toLocaleString()}`
 
             const paymentsTableHtml = payments.map(payment => `
                 <tr>
@@ -1382,11 +1454,10 @@
                         <button class="btn btn-sm btn-danger" onclick="deletePayment('${payment.id}')">🗑️</button>
                     </td>
                 </tr>
-            `).join('');
-            document.getElementById('payments-table').innerHTML = paymentsTableHtml;
+            `).join('')
+            document.getElementById('payments-table').innerHTML = paymentsTableHtml
         }
 
-        // Employees
         function renderEmployees() {
             const employeesHtml = employees.map(employee => `
                 <div class="card">
@@ -1416,26 +1487,25 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('employees-content').innerHTML = employeesHtml;
+            `).join('')
+            document.getElementById('employees-content').innerHTML = employeesHtml
         }
 
-        // Projects
         function renderProjects() {
             // Setup tab functionality
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', () => {
-                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                    button.classList.add('active');
-                    currentProjectStatus = button.dataset.status;
-                    renderProjectsContent();
-                });
-            });
-            renderProjectsContent();
+                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'))
+                    button.classList.add('active')
+                    currentProjectStatus = button.dataset.status
+                    renderProjectsContent()
+                })
+            })
+            renderProjectsContent()
         }
 
         function renderProjectsContent() {
-            const filteredProjects = projects.filter(project => project.status === currentProjectStatus);
+            const filteredProjects = projects.filter(project => project.status === currentProjectStatus)
             
             const projectsHtml = filteredProjects.map(project => `
                 <div class="card">
@@ -1467,389 +1537,555 @@
                         <button class="btn btn-sm btn-danger" onclick="deleteProject('${project.id}')">Delete</button>
                     </div>
                 </div>
-            `).join('');
+            `).join('')
             
-            document.getElementById('projects-content').innerHTML = projectsHtml || '<div class="text-center py-8 text-gray-500">No projects found</div>';
+            document.getElementById('projects-content').innerHTML = projectsHtml || '<div class="text-center py-8 text-gray-500">No projects found</div>'
         }
 
         function getStatusBadgeClass(status) {
             switch(status) {
-                case 'Current': return 'badge-blue';
-                case 'Pending': return 'badge-yellow';
-                case 'Complete': return 'badge-green';
-                case 'Cancelled': return 'badge-red';
-                default: return 'badge-gray';
+                case 'Current': return 'badge-blue'
+                case 'Pending': return 'badge-yellow'
+                case 'Complete': return 'badge-green'
+                case 'Cancelled': return 'badge-red'
+                default: return 'badge-gray'
             }
         }
 
-        // Modal functions
+        // ===== MODAL FUNCTIONS =====
         function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
+            document.getElementById(modalId).classList.add('active')
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            editingId = null;
+            document.getElementById(modalId).classList.remove('active')
+            editingId = null
             // Reset forms
-            document.querySelectorAll('form').forEach(form => form.reset());
+            document.querySelectorAll('form').forEach(form => form.reset())
         }
 
         function openClientModal() {
-            populateClientSelect();
-            openModal('clientModal');
+            populateClientSelect()
+            openModal('clientModal')
         }
 
         function openExpenseModal() {
-            openModal('expenseModal');
+            openModal('expenseModal')
         }
 
         function openPaymentModal() {
-            populatePaymentClientSelect();
-            openModal('paymentModal');
+            populatePaymentClientSelect()
+            openModal('paymentModal')
         }
 
         function openEmployeeModal() {
-            populateEmployeeClientAssignments();
-            openModal('employeeModal');
+            populateEmployeeClientAssignments()
+            openModal('employeeModal')
         }
 
         function openProjectModal() {
-            populateProjectClientSelect();
-            openModal('projectModal');
+            populateProjectClientSelect()
+            openModal('projectModal')
         }
 
-        // Populate select options
+        // ===== POPULATE SELECT OPTIONS =====
         function populateClientSelect() {
-            const select = document.getElementById('paymentClient');
+            const select = document.getElementById('paymentClient')
             select.innerHTML = '<option value="">Select Client</option>' + 
-                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('');
+                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('')
         }
 
         function populatePaymentClientSelect() {
-            const select = document.getElementById('paymentClient');
+            const select = document.getElementById('paymentClient')
             select.innerHTML = '<option value="">Select Client</option>' + 
-                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('');
+                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('')
             
             select.addEventListener('change', function() {
-                const selectedClient = clients.find(c => c.id === this.value);
+                const selectedClient = clients.find(c => c.id === this.value)
                 if (selectedClient) {
-                    document.getElementById('paymentService').value = selectedClient.serviceName;
-                    document.getElementById('paymentCost').value = selectedClient.serviceCost;
+                    document.getElementById('paymentService').value = selectedClient.serviceName
+                    document.getElementById('paymentCost').value = selectedClient.serviceCost
                 }
-            });
+            })
         }
 
         function populateProjectClientSelect() {
-            const select = document.getElementById('projectClient');
+            const select = document.getElementById('projectClient')
             select.innerHTML = '<option value="">Select Client</option>' + 
-                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('');
+                clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('')
             
             // Remove any existing event listeners to prevent duplicates
-            const newSelect = select.cloneNode(true);
-            select.parentNode.replaceChild(newSelect, select);
+            const newSelect = select.cloneNode(true)
+            select.parentNode.replaceChild(newSelect, select)
             
             // Add the change event listener
             newSelect.addEventListener('change', function() {
-                const selectedClient = clients.find(c => c.id === this.value);
+                const selectedClient = clients.find(c => c.id === this.value)
                 if (selectedClient) {
-                    document.getElementById('projectService').value = selectedClient.serviceName;
-                    document.getElementById('projectCost').value = selectedClient.serviceCost;
+                    document.getElementById('projectService').value = selectedClient.serviceName
+                    document.getElementById('projectCost').value = selectedClient.serviceCost
                 } else {
-                    document.getElementById('projectService').value = '';
-                    document.getElementById('projectCost').value = '';
+                    document.getElementById('projectService').value = ''
+                    document.getElementById('projectCost').value = ''
                 }
-            });
+            })
         }
 
         function populateEmployeeClientAssignments() {
-            const container = document.getElementById('clientAssignments');
+            const container = document.getElementById('clientAssignments')
             container.innerHTML = clients.map(client => `
                 <label class="flex items-center space-x-2 mb-2">
                     <input type="checkbox" value="${client.company}" name="clientAssignment">
                     <span>${client.company} (${client.name})</span>
                 </label>
-            `).join('');
+            `).join('')
         }
 
-        // Form submissions
-        document.getElementById('clientForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // ===== FORM SUBMISSIONS =====
+        document.getElementById('clientForm').addEventListener('submit', async function(e) {
+            e.preventDefault()
+            const button = e.target.querySelector('button[type="submit"]')
+            showButtonLoading(button)
             
-            const clientData = {
-                id: editingId || Date.now().toString(),
-                name: document.getElementById('clientName').value,
-                company: document.getElementById('clientCompany').value,
-                email: document.getElementById('clientEmail').value,
-                phone: document.getElementById('clientPhone').value,
-                address: document.getElementById('clientAddress').value,
-                serviceName: document.getElementById('clientService').value,
-                serviceCost: parseFloat(document.getElementById('clientCost').value)
-            };
+            try {
+                const clientData = {
+                    name: document.getElementById('clientName').value,
+                    company: document.getElementById('clientCompany').value,
+                    email: document.getElementById('clientEmail').value,
+                    phone: document.getElementById('clientPhone').value,
+                    address: document.getElementById('clientAddress').value,
+                    service_name: document.getElementById('clientService').value,
+                    service_cost: parseFloat(document.getElementById('clientCost').value)
+                }
 
-            if (editingId) {
-                const index = clients.findIndex(c => c.id === editingId);
-                clients[index] = clientData;
-            } else {
-                clients.push(clientData);
+                let result
+                if (editingId) {
+                    result = await supabase
+                        .from('clients')
+                        .update(clientData)
+                        .eq('id', editingId)
+                        .select()
+                } else {
+                    result = await supabase
+                        .from('clients')
+                        .insert([clientData])
+                        .select()
+                }
+
+                if (result.error) throw result.error
+
+                await loadAllData()
+                renderClients()
+                closeModal('clientModal')
+                showSuccess('Client saved successfully')
+            } catch (error) {
+                console.error('Error saving client:', error)
+                showError('Failed to save client: ' + error.message)
+            } finally {
+                hideButtonLoading(button)
             }
+        })
 
-            saveData();
-            renderClients();
-            closeModal('clientModal');
-        });
-
-        document.getElementById('expenseForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        document.getElementById('expenseForm').addEventListener('submit', async function(e) {
+            e.preventDefault()
+            const button = e.target.querySelector('button[type="submit"]')
+            showButtonLoading(button)
             
-            const expenseData = {
-                id: editingId || Date.now().toString(),
-                date: document.getElementById('expenseDate').value,
-                description: document.getElementById('expenseDescription').value,
-                amount: parseFloat(document.getElementById('expenseAmount').value),
-                category: document.getElementById('expenseCategory').value
-            };
+            try {
+                const expenseData = {
+                    date: document.getElementById('expenseDate').value,
+                    description: document.getElementById('expenseDescription').value,
+                    amount: parseFloat(document.getElementById('expenseAmount').value),
+                    category: document.getElementById('expenseCategory').value
+                }
 
-            if (editingId) {
-                const index = expenses.findIndex(e => e.id === editingId);
-                expenses[index] = expenseData;
-            } else {
-                expenses.push(expenseData);
+                let result
+                if (editingId) {
+                    result = await supabase
+                        .from('expenses')
+                        .update(expenseData)
+                        .eq('id', editingId)
+                        .select()
+                } else {
+                    result = await supabase
+                        .from('expenses')
+                        .insert([expenseData])
+                        .select()
+                }
+
+                if (result.error) throw result.error
+
+                await loadAllData()
+                renderExpenses()
+                closeModal('expenseModal')
+                showSuccess('Expense saved successfully')
+            } catch (error) {
+                console.error('Error saving expense:', error)
+                showError('Failed to save expense: ' + error.message)
+            } finally {
+                hideButtonLoading(button)
             }
+        })
 
-            saveData();
-            renderExpenses();
-            closeModal('expenseModal');
-        });
-
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault()
+            const button = e.target.querySelector('button[type="submit"]')
+            showButtonLoading(button)
             
-            const clientId = document.getElementById('paymentClient').value;
-            const selectedClient = clients.find(c => c.id === clientId);
-            
-            const paymentData = {
-                id: editingId || Date.now().toString(),
-                clientId: clientId,
-                clientName: selectedClient ? selectedClient.name : '',
-                serviceName: document.getElementById('paymentService').value,
-                serviceCost: parseFloat(document.getElementById('paymentCost').value),
-                status: document.getElementById('paymentStatus').value,
-                date: document.getElementById('paymentDate').value
-            };
+            try {
+                const clientId = document.getElementById('paymentClient').value
+                const selectedClient = clients.find(c => c.id === clientId)
+                
+                const paymentData = {
+                    client_id: clientId,
+                    client_name: selectedClient ? selectedClient.name : '',
+                    service_name: document.getElementById('paymentService').value,
+                    service_cost: parseFloat(document.getElementById('paymentCost').value),
+                    status: document.getElementById('paymentStatus').value,
+                    date: document.getElementById('paymentDate').value
+                }
 
-            if (editingId) {
-                const index = payments.findIndex(p => p.id === editingId);
-                payments[index] = paymentData;
-            } else {
-                payments.push(paymentData);
+                let result
+                if (editingId) {
+                    result = await supabase
+                        .from('payments')
+                        .update(paymentData)
+                        .eq('id', editingId)
+                        .select()
+                } else {
+                    result = await supabase
+                        .from('payments')
+                        .insert([paymentData])
+                        .select()
+                }
+
+                if (result.error) throw result.error
+
+                await loadAllData()
+                renderPayments()
+                closeModal('paymentModal')
+                showSuccess('Payment saved successfully')
+            } catch (error) {
+                console.error('Error saving payment:', error)
+                showError('Failed to save payment: ' + error.message)
+            } finally {
+                hideButtonLoading(button)
             }
+        })
 
-            saveData();
-            renderPayments();
-            closeModal('paymentModal');
-        });
+        document.getElementById('employeeForm').addEventListener('submit', async function(e) {
+            e.preventDefault()
+            const button = e.target.querySelector('button[type="submit"]')
+            showButtonLoading(button)
+            
+            try {
+                const skills = document.getElementById('employeeSkills').value
+                    .split(',')
+                    .map(skill => skill.trim())
+                    .filter(skill => skill)
+                
+                const assignments = Array.from(document.querySelectorAll('input[name="clientAssignment"]:checked'))
+                    .map(checkbox => checkbox.value)
+                
+                const employeeData = {
+                    name: document.getElementById('employeeName').value,
+                    email: document.getElementById('employeeEmail').value,
+                    skills: skills,
+                    client_assignments: assignments
+                }
 
-        document.getElementById('employeeForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const skills = document.getElementById('employeeSkills').value
-                .split(',')
-                .map(skill => skill.trim())
-                .filter(skill => skill);
-            
-            const assignments = Array.from(document.querySelectorAll('input[name="clientAssignment"]:checked'))
-                .map(checkbox => checkbox.value);
-            
-            const employeeData = {
-                id: editingId || Date.now().toString(),
-                name: document.getElementById('employeeName').value,
-                email: document.getElementById('employeeEmail').value,
-                skills: skills,
-                clientAssignments: assignments
-            };
+                let result
+                if (editingId) {
+                    result = await supabase
+                        .from('employees')
+                        .update(employeeData)
+                        .eq('id', editingId)
+                        .select()
+                } else {
+                    result = await supabase
+                        .from('employees')
+                        .insert([employeeData])
+                        .select()
+                }
 
-            if (editingId) {
-                const index = employees.findIndex(e => e.id === editingId);
-                employees[index] = employeeData;
-            } else {
-                employees.push(employeeData);
+                if (result.error) throw result.error
+
+                await loadAllData()
+                renderEmployees()
+                closeModal('employeeModal')
+                showSuccess('Employee saved successfully')
+            } catch (error) {
+                console.error('Error saving employee:', error)
+                showError('Failed to save employee: ' + error.message)
+            } finally {
+                hideButtonLoading(button)
             }
+        })
 
-            saveData();
-            renderEmployees();
-            closeModal('employeeModal');
-        });
-
-        document.getElementById('projectForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        document.getElementById('projectForm').addEventListener('submit', async function(e) {
+            e.preventDefault()
+            const button = e.target.querySelector('button[type="submit"]')
+            showButtonLoading(button)
             
-            const clientId = document.getElementById('projectClient').value;
-            const selectedClient = clients.find(c => c.id === clientId);
-            
-            const projectData = {
-                id: editingId || Date.now().toString(),
-                clientId: clientId,
-                clientName: selectedClient ? selectedClient.name : '',
-                serviceName: document.getElementById('projectService').value,
-                status: document.getElementById('projectStatus').value,
-                startDate: document.getElementById('projectStartDate').value,
-                endDate: document.getElementById('projectEndDate').value,
-                cost: parseFloat(document.getElementById('projectCost').value)
-            };
+            try {
+                const clientId = document.getElementById('projectClient').value
+                const selectedClient = clients.find(c => c.id === clientId)
+                
+                const projectData = {
+                    client_id: clientId,
+                    client_name: selectedClient ? selectedClient.name : '',
+                    service_name: document.getElementById('projectService').value,
+                    status: document.getElementById('projectStatus').value,
+                    start_date: document.getElementById('projectStartDate').value,
+                    end_date: document.getElementById('projectEndDate').value || null,
+                    cost: parseFloat(document.getElementById('projectCost').value)
+                }
 
-            if (editingId) {
-                const index = projects.findIndex(p => p.id === editingId);
-                projects[index] = projectData;
-            } else {
-                projects.push(projectData);
+                let result
+                if (editingId) {
+                    result = await supabase
+                        .from('projects')
+                        .update(projectData)
+                        .eq('id', editingId)
+                        .select()
+                } else {
+                    result = await supabase
+                        .from('projects')
+                        .insert([projectData])
+                        .select()
+                }
+
+                if (result.error) throw result.error
+
+                await loadAllData()
+                renderProjects()
+                closeModal('projectModal')
+                showSuccess('Project saved successfully')
+            } catch (error) {
+                console.error('Error saving project:', error)
+                showError('Failed to save project: ' + error.message)
+            } finally {
+                hideButtonLoading(button)
             }
+        })
 
-            saveData();
-            renderProjects();
-            closeModal('projectModal');
-        });
-
-        // Edit functions
+        // ===== EDIT FUNCTIONS =====
         function editClient(id) {
-            const client = clients.find(c => c.id === id);
+            const client = clients.find(c => c.id === id)
             if (client) {
-                editingId = id;
-                document.getElementById('clientModalTitle').textContent = 'Edit Client';
-                document.getElementById('clientName').value = client.name;
-                document.getElementById('clientCompany').value = client.company;
-                document.getElementById('clientEmail').value = client.email;
-                document.getElementById('clientPhone').value = client.phone;
-                document.getElementById('clientAddress').value = client.address;
-                document.getElementById('clientService').value = client.serviceName;
-                document.getElementById('clientCost').value = client.serviceCost;
-                openClientModal();
+                editingId = id
+                document.getElementById('clientModalTitle').textContent = 'Edit Client'
+                document.getElementById('clientName').value = client.name
+                document.getElementById('clientCompany').value = client.company
+                document.getElementById('clientEmail').value = client.email
+                document.getElementById('clientPhone').value = client.phone
+                document.getElementById('clientAddress').value = client.address
+                document.getElementById('clientService').value = client.serviceName
+                document.getElementById('clientCost').value = client.serviceCost
+                openClientModal()
             }
         }
 
         function editExpense(id) {
-            const expense = expenses.find(e => e.id === id);
+            const expense = expenses.find(e => e.id === id)
             if (expense) {
-                editingId = id;
-                document.getElementById('expenseModalTitle').textContent = 'Edit Expense';
-                document.getElementById('expenseDate').value = expense.date;
-                document.getElementById('expenseDescription').value = expense.description;
-                document.getElementById('expenseAmount').value = expense.amount;
-                document.getElementById('expenseCategory').value = expense.category;
-                openExpenseModal();
+                editingId = id
+                document.getElementById('expenseModalTitle').textContent = 'Edit Expense'
+                document.getElementById('expenseDate').value = expense.date
+                document.getElementById('expenseDescription').value = expense.description
+                document.getElementById('expenseAmount').value = expense.amount
+                document.getElementById('expenseCategory').value = expense.category
+                openExpenseModal()
             }
         }
 
         function editPayment(id) {
-            const payment = payments.find(p => p.id === id);
+            const payment = payments.find(p => p.id === id)
             if (payment) {
-                editingId = id;
-                document.getElementById('paymentModalTitle').textContent = 'Edit Payment';
-                populatePaymentClientSelect();
-                document.getElementById('paymentClient').value = payment.clientId;
-                document.getElementById('paymentService').value = payment.serviceName;
-                document.getElementById('paymentCost').value = payment.serviceCost;
-                document.getElementById('paymentStatus').value = payment.status;
-                document.getElementById('paymentDate').value = payment.date;
-                openPaymentModal();
+                editingId = id
+                document.getElementById('paymentModalTitle').textContent = 'Edit Payment'
+                populatePaymentClientSelect()
+                document.getElementById('paymentClient').value = payment.clientId
+                document.getElementById('paymentService').value = payment.serviceName
+                document.getElementById('paymentCost').value = payment.serviceCost
+                document.getElementById('paymentStatus').value = payment.status
+                document.getElementById('paymentDate').value = payment.date
+                openPaymentModal()
             }
         }
 
         function editEmployee(id) {
-            const employee = employees.find(e => e.id === id);
+            const employee = employees.find(e => e.id === id)
             if (employee) {
-                editingId = id;
-                document.getElementById('employeeModalTitle').textContent = 'Edit Employee';
-                document.getElementById('employeeName').value = employee.name;
-                document.getElementById('employeeEmail').value = employee.email;
-                document.getElementById('employeeSkills').value = employee.skills.join(', ');
-                populateEmployeeClientAssignments();
+                editingId = id
+                document.getElementById('employeeModalTitle').textContent = 'Edit Employee'
+                document.getElementById('employeeName').value = employee.name
+                document.getElementById('employeeEmail').value = employee.email
+                document.getElementById('employeeSkills').value = employee.skills.join(', ')
+                populateEmployeeClientAssignments()
                 // Check assigned clients
                 setTimeout(() => {
                     employee.clientAssignments.forEach(assignment => {
-                        const checkbox = document.querySelector(`input[value="${assignment}"]`);
-                        if (checkbox) checkbox.checked = true;
-                    });
-                }, 100);
-                openEmployeeModal();
+                        const checkbox = document.querySelector(`input[value="${assignment}"]`)
+                        if (checkbox) checkbox.checked = true
+                    })
+                }, 100)
+                openEmployeeModal()
             }
         }
 
         function editProject(id) {
-            const project = projects.find(p => p.id === id);
+            const project = projects.find(p => p.id === id)
             if (project) {
-                editingId = id;
-                document.getElementById('projectModalTitle').textContent = 'Edit Project';
-                populateProjectClientSelect();
+                editingId = id
+                document.getElementById('projectModalTitle').textContent = 'Edit Project'
+                populateProjectClientSelect()
                 
                 // Set values after populating the select
                 setTimeout(() => {
-                    document.getElementById('projectClient').value = project.clientId;
-                    document.getElementById('projectService').value = project.serviceName;
-                    document.getElementById('projectStatus').value = project.status;
-                    document.getElementById('projectStartDate').value = project.startDate;
-                    document.getElementById('projectEndDate').value = project.endDate;
-                    document.getElementById('projectCost').value = project.cost;
-                }, 100);
+                    document.getElementById('projectClient').value = project.clientId
+                    document.getElementById('projectService').value = project.serviceName
+                    document.getElementById('projectStatus').value = project.status
+                    document.getElementById('projectStartDate').value = project.startDate
+                    document.getElementById('projectEndDate').value = project.endDate || ''
+                    document.getElementById('projectCost').value = project.cost
+                }, 100)
                 
-                openModal('projectModal');
+                openModal('projectModal')
             }
         }
 
-        // Delete functions
-        function deleteClient(id) {
+        // ===== DELETE FUNCTIONS =====
+        async function deleteClient(id) {
             if (confirm('Are you sure you want to delete this client?')) {
-                clients = clients.filter(c => c.id !== id);
-                saveData();
-                renderClients();
+                showLoading()
+                try {
+                    const { error } = await supabase
+                        .from('clients')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) throw error
+
+                    await loadAllData()
+                    renderClients()
+                    showSuccess('Client deleted successfully')
+                } catch (error) {
+                    console.error('Error deleting client:', error)
+                    showError('Failed to delete client: ' + error.message)
+                } finally {
+                    hideLoading()
+                }
             }
         }
 
-        function deleteExpense(id) {
+        async function deleteExpense(id) {
             if (confirm('Are you sure you want to delete this expense?')) {
-                expenses = expenses.filter(e => e.id !== id);
-                saveData();
-                renderExpenses();
+                showLoading()
+                try {
+                    const { error } = await supabase
+                        .from('expenses')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) throw error
+
+                    await loadAllData()
+                    renderExpenses()
+                    showSuccess('Expense deleted successfully')
+                } catch (error) {
+                    console.error('Error deleting expense:', error)
+                    showError('Failed to delete expense: ' + error.message)
+                } finally {
+                    hideLoading()
+                }
             }
         }
 
-        function deletePayment(id) {
+        async function deletePayment(id) {
             if (confirm('Are you sure you want to delete this payment?')) {
-                payments = payments.filter(p => p.id !== id);
-                saveData();
-                renderPayments();
+                showLoading()
+                try {
+                    const { error } = await supabase
+                        .from('payments')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) throw error
+
+                    await loadAllData()
+                    renderPayments()
+                    showSuccess('Payment deleted successfully')
+                } catch (error) {
+                    console.error('Error deleting payment:', error)
+                    showError('Failed to delete payment: ' + error.message)
+                } finally {
+                    hideLoading()
+                }
             }
         }
 
-        function deleteEmployee(id) {
+        async function deleteEmployee(id) {
             if (confirm('Are you sure you want to delete this employee?')) {
-                employees = employees.filter(e => e.id !== id);
-                saveData();
-                renderEmployees();
+                showLoading()
+                try {
+                    const { error } = await supabase
+                        .from('employees')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) throw error
+
+                    await loadAllData()
+                    renderEmployees()
+                    showSuccess('Employee deleted successfully')
+                } catch (error) {
+                    console.error('Error deleting employee:', error)
+                    showError('Failed to delete employee: ' + error.message)
+                } finally {
+                    hideLoading()
+                }
             }
         }
 
-        function deleteProject(id) {
+        async function deleteProject(id) {
             if (confirm('Are you sure you want to delete this project?')) {
-                projects = projects.filter(p => p.id !== id);
-                saveData();
-                renderProjects();
+                showLoading()
+                try {
+                    const { error } = await supabase
+                        .from('projects')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) throw error
+
+                    await loadAllData()
+                    renderProjects()
+                    showSuccess('Project deleted successfully')
+                } catch (error) {
+                    console.error('Error deleting project:', error)
+                    showError('Failed to delete project: ' + error.message)
+                } finally {
+                    hideLoading()
+                }
             }
         }
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            initTheme();
-            renderDashboard();
-        });
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', async function() {
+            initTheme()
+            await loadAllData()
+            renderDashboard()
+        })
 
         // Close modals when clicking outside
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
-                    closeModal(modal.id);
+                    closeModal(modal.id)
                 }
-            });
-        });
+            })
+        })
     </script>
 </body>
 </html>
