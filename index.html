@@ -1544,11 +1544,19 @@
             select.innerHTML = '<option value="">Select Client</option>' + 
                 clients.map(client => `<option value="${client.id}">${client.name} - ${client.company}</option>`).join('');
             
-            select.addEventListener('change', function() {
+            // Remove any existing event listeners to prevent duplicates
+            const newSelect = select.cloneNode(true);
+            select.parentNode.replaceChild(newSelect, select);
+            
+            // Add the change event listener
+            newSelect.addEventListener('change', function() {
                 const selectedClient = clients.find(c => c.id === this.value);
                 if (selectedClient) {
                     document.getElementById('projectService').value = selectedClient.serviceName;
                     document.getElementById('projectCost').value = selectedClient.serviceCost;
+                } else {
+                    document.getElementById('projectService').value = '';
+                    document.getElementById('projectCost').value = '';
                 }
             });
         }
@@ -1772,13 +1780,18 @@
                 editingId = id;
                 document.getElementById('projectModalTitle').textContent = 'Edit Project';
                 populateProjectClientSelect();
-                document.getElementById('projectClient').value = project.clientId;
-                document.getElementById('projectService').value = project.serviceName;
-                document.getElementById('projectStatus').value = project.status;
-                document.getElementById('projectStartDate').value = project.startDate;
-                document.getElementById('projectEndDate').value = project.endDate;
-                document.getElementById('projectCost').value = project.cost;
-                openProjectModal();
+                
+                // Set values after populating the select
+                setTimeout(() => {
+                    document.getElementById('projectClient').value = project.clientId;
+                    document.getElementById('projectService').value = project.serviceName;
+                    document.getElementById('projectStatus').value = project.status;
+                    document.getElementById('projectStartDate').value = project.startDate;
+                    document.getElementById('projectEndDate').value = project.endDate;
+                    document.getElementById('projectCost').value = project.cost;
+                }, 100);
+                
+                openModal('projectModal');
             }
         }
 
