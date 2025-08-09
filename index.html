@@ -14,7 +14,7 @@
 </head>
 
 <body>
-     <!-- Loading Overlay  -->
+    <!-- Loading Overlay  -->
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="loader-container">
             <div class="spinner"></div>
@@ -22,21 +22,21 @@
         </div>
     </div>
 
-     <!-- Mobile Menu Toggle  -->
+    <!-- Mobile Menu Toggle  -->
     <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" id="mobileMenuToggle">
         ☰
     </button>
 
-     <!-- Mobile Overlay  -->
+    <!-- Mobile Overlay  -->
     <div class="mobile-overlay" onclick="closeMobileMenu()" id="mobileOverlay"></div>
 
-     <!-- Theme Toggle Button  -->
+    <!-- Theme Toggle Button  -->
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
         🌙
     </button>
 
     <div class="container">
-         <!-- Sidebar  -->
+        <!-- Sidebar  -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h1>Expense Manager</h1>
@@ -69,9 +69,9 @@
             </nav>
         </div>
 
-         <!-- Main Content  -->
+        <!-- Main Content  -->
         <div class="main-content" id="mainContent">
-             <!-- Dashboard Page  -->
+            <!-- Dashboard Page  -->
             <div id="dashboard" class="page active">
                 <div class="page-header">
                     <h1 class="page-title">Dashboard</h1>
@@ -125,7 +125,7 @@
                 </div>
             </div>
 
-             <!-- Projects Page  -->
+            <!-- Projects Page  -->
             <div id="projects" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -148,7 +148,7 @@
                 </div>
             </div>
 
-             <!-- Clients Page  -->
+            <!-- Clients Page  -->
             <div id="clients" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -162,7 +162,7 @@
                 <div id="clients-content" class="grid grid-cols-3"></div>
             </div>
 
-             <!-- Expenses Page  -->
+            <!-- Expenses Page  -->
             <div id="expenses" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -175,7 +175,7 @@
                 </div>
 
                 <div class="grid grid-cols-3 mb-4">
-                    <div class="card">
+                    <div class="card" style="grid-column: span 2;">
                         <h3 class="card-title">Total Expenses</h3>
                         <div class="stat-value stat-red" id="expenses-total">$0</div>
                     </div>
@@ -188,23 +188,21 @@
                 <div class="card">
                     <h3 class="card-title">All Expenses</h3>
                     <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Description</th>
-                                    <th>Category</th>
-                                    <th class="text-right">Amount</th>
-                                    <th class="text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="expenses-table"></tbody>
-                        </table>
+                        <div class="expenses-container">
+                            <div class="expenses-header">
+                                <div class="col">Date</div>
+                                <div class="col">Description</div>
+                                <div class="col">Category</div>
+                                <div class="col text-right">Amount</div>
+                                <div class="col text-right">Actions</div>
+                            </div>
+                            <div id="expenses-table"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-             <!-- Payments Page  -->
+            <!-- Payments Page  -->
             <div id="payments" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -247,7 +245,7 @@
                 </div>
             </div>
 
-             <!-- Employees Page  -->
+            <!-- Employees Page  -->
             <div id="employees" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -356,7 +354,7 @@
         </div>
     </div>
 
-     <!-- Payment Modal  -->
+    <!-- Payment Modal  -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -400,7 +398,7 @@
         </div>
     </div>
 
-     <!-- Employee Modal  -->
+    <!-- Employee Modal  -->
     <div id="employeeModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -429,13 +427,14 @@
                         <span class="btn-text">Save Employee</span>
                         <div class="loading hidden"></div>
                     </button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('employeeModal')">Cancel</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('employeeModal')">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-     <!-- Project Modal  -->
+    <!-- Project Modal  -->
     <div id="projectModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
