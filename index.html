@@ -119,6 +119,37 @@
             font-size: 18px;
         }
 
+        /* Error Message */
+        .error-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-red);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .success-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-green);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            max-width: 90%;
+            text-align: center;
+        }
+
         /* Theme Toggle Button */
         .theme-toggle {
             position: fixed;
@@ -727,7 +758,7 @@
 
          <!-- Main Content  -->
         <div class="main-content">
-             Dashboard Page 
+             <!-- Dashboard Page  -->
             <div id="dashboard" class="page active">
                 <div class="page-header">
                     <h1 class="page-title">Dashboard</h1>
@@ -1139,14 +1170,12 @@
 
     <script>
         // ===== SUPABASE CONFIGURATION =====
-        // Replace these with your actual Supabase credentials
-        const SUPABASE_URL = 'https://your-project-id.supabase.co'  // Yahan apna URL
-        const SUPABASE_ANON_KEY = 'your-anon-key-here'              // Yahan apna key
+        // 🚨 IMPORTANT: Replace these with your actual Supabase credentials
+        const SUPABASE_URL = 'https://your-project-id.supabase.co'  // Replace with your Project URL
+        const SUPABASE_ANON_KEY = 'your-anon-key-here'              // Replace with your anon public key
         
-        // Initialize Supabase client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-        // ===== GLOBAL VARIABLES =====
+        // Global variables
+        let supabase = null
         let clients = []
         let expenses = []
         let payments = []
@@ -1180,19 +1209,72 @@
             button.disabled = false
         }
 
+        function showMessage(message, type = 'error') {
+            // Remove existing messages
+            const existingMessages = document.querySelectorAll('.error-message, .success-message')
+            existingMessages.forEach(msg => msg.remove())
+
+            // Create new message
+            const messageDiv = document.createElement('div')
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message'
+            messageDiv.textContent = message
+            document.body.appendChild(messageDiv)
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                messageDiv.remove()
+            }, 5000)
+        }
+
         function showError(message) {
-            alert('Error: ' + message)
+            showMessage(message, 'error')
+            console.error('Error:', message)
         }
 
         function showSuccess(message) {
-            // You can replace this with a toast notification
-            console.log('Success: ' + message)
+            showMessage(message, 'success')
+            console.log('Success:', message)
+        }
+
+        // ===== SUPABASE INITIALIZATION =====
+        function initializeSupabase() {
+            try {
+                // Check if Supabase is loaded
+                if (typeof window.supabase === 'undefined') {
+                    throw new Error('Supabase library not loaded')
+                }
+
+                // Check if credentials are configured
+                if (SUPABASE_URL === 'https://your-project-id.supabase.co' || SUPABASE_ANON_KEY === 'your-anon-key-here') {
+                    throw new Error('Please configure your Supabase credentials in the code')
+                }
+
+                // Initialize Supabase client
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+                
+                if (!supabase) {
+                    throw new Error('Failed to initialize Supabase client')
+                }
+
+                console.log('Supabase initialized successfully')
+                return true
+            } catch (error) {
+                showError('Supabase initialization failed: ' + error.message)
+                return false
+            }
         }
 
         // ===== DATABASE FUNCTIONS =====
         async function loadAllData() {
+            if (!supabase) {
+                showError('Supabase not initialized')
+                return
+            }
+
             showLoading()
             try {
+                console.log('Loading data from Supabase...')
+                
                 // Load all data in parallel
                 const [clientsRes, expensesRes, paymentsRes, employeesRes, projectsRes] = await Promise.all([
                     supabase.from('clients').select('*').order('created_at', { ascending: false }),
@@ -1202,20 +1284,15 @@
                     supabase.from('projects').select('*').order('created_at', { ascending: false })
                 ])
 
-                if (clientsRes.error) throw clientsRes.error
-                if (expensesRes.error) throw expensesRes.error
-                if (paymentsRes.error) throw paymentsRes.error
-                if (employeesRes.error) throw employeesRes.error
-                if (projectsRes.error) throw projectsRes.error
+                // Check for errors
+                if (clientsRes.error) throw new Error(`Clients: ${clientsRes.error.message}`)
+                if (expensesRes.error) throw new Error(`Expenses: ${expensesRes.error.message}`)
+                if (paymentsRes.error) throw new Error(`Payments: ${paymentsRes.error.message}`)
+                if (employeesRes.error) throw new Error(`Employees: ${employeesRes.error.message}`)
+                if (projectsRes.error) throw new Error(`Projects: ${projectsRes.error.message}`)
 
-                clients = clientsRes.data || []
-                expenses = expensesRes.data || []
-                payments = paymentsRes.data || []
-                employees = employeesRes.data || []
-                projects = projectsRes.data || []
-
-                // Convert database format to app format
-                clients = clients.map(client => ({
+                // Process data
+                clients = (clientsRes.data || []).map(client => ({
                     id: client.id,
                     name: client.name,
                     company: client.company,
@@ -1226,7 +1303,7 @@
                     serviceCost: parseFloat(client.service_cost)
                 }))
 
-                expenses = expenses.map(expense => ({
+                expenses = (expensesRes.data || []).map(expense => ({
                     id: expense.id,
                     date: expense.date,
                     description: expense.description,
@@ -1234,7 +1311,7 @@
                     category: expense.category
                 }))
 
-                payments = payments.map(payment => ({
+                payments = (paymentsRes.data || []).map(payment => ({
                     id: payment.id,
                     clientId: payment.client_id,
                     clientName: payment.client_name,
@@ -1244,7 +1321,7 @@
                     date: payment.date
                 }))
 
-                employees = employees.map(employee => ({
+                employees = (employeesRes.data || []).map(employee => ({
                     id: employee.id,
                     name: employee.name,
                     email: employee.email,
@@ -1252,7 +1329,7 @@
                     clientAssignments: employee.client_assignments || []
                 }))
 
-                projects = projects.map(project => ({
+                projects = (projectsRes.data || []).map(project => ({
                     id: project.id,
                     clientId: project.client_id,
                     clientName: project.client_name,
@@ -1263,7 +1340,15 @@
                     cost: parseFloat(project.cost)
                 }))
 
-                showSuccess('Data loaded successfully')
+                console.log('Data loaded successfully:', {
+                    clients: clients.length,
+                    expenses: expenses.length,
+                    payments: payments.length,
+                    employees: employees.length,
+                    projects: projects.length
+                })
+
+                showSuccess('Data loaded successfully!')
             } catch (error) {
                 console.error('Error loading data:', error)
                 showError('Failed to load data: ' + error.message)
@@ -1358,7 +1443,7 @@
                     </div>
                 </div>
             `).join('')
-            document.getElementById('recent-payments').innerHTML = recentPayments
+            document.getElementById('recent-payments').innerHTML = recentPayments || '<div class="text-gray-500">No payments yet</div>'
 
             // Recent expenses
             const recentExpenses = expenses.slice(0, 5).map(expense => `
@@ -1373,7 +1458,7 @@
                     </div>
                 </div>
             `).join('')
-            document.getElementById('recent-expenses').innerHTML = recentExpenses
+            document.getElementById('recent-expenses').innerHTML = recentExpenses || '<div class="text-gray-500">No expenses yet</div>'
         }
 
         function renderClients() {
@@ -1398,7 +1483,7 @@
                     </div>
                 </div>
             `).join('')
-            document.getElementById('clients-content').innerHTML = clientsHtml
+            document.getElementById('clients-content').innerHTML = clientsHtml || '<div class="text-center py-8 text-gray-500">No clients yet. Add your first client!</div>'
         }
 
         function renderExpenses() {
@@ -1417,7 +1502,7 @@
                     <span class="font-medium">$${amount.toLocaleString()}</span>
                 </div>
             `).join('')
-            document.getElementById('expenses-by-category').innerHTML = categoriesHtml
+            document.getElementById('expenses-by-category').innerHTML = categoriesHtml || '<div class="text-gray-500">No expenses yet</div>'
 
             // Expenses table
             const expensesTableHtml = expenses.map(expense => `
@@ -1432,7 +1517,7 @@
                     </td>
                 </tr>
             `).join('')
-            document.getElementById('expenses-table').innerHTML = expensesTableHtml
+            document.getElementById('expenses-table').innerHTML = expensesTableHtml || '<tr><td colspan="5" class="text-center text-gray-500">No expenses yet</td></tr>'
         }
 
         function renderPayments() {
@@ -1455,7 +1540,7 @@
                     </td>
                 </tr>
             `).join('')
-            document.getElementById('payments-table').innerHTML = paymentsTableHtml
+            document.getElementById('payments-table').innerHTML = paymentsTableHtml || '<tr><td colspan="6" class="text-center text-gray-500">No payments yet</td></tr>'
         }
 
         function renderEmployees() {
@@ -1488,7 +1573,7 @@
                     </div>
                 </div>
             `).join('')
-            document.getElementById('employees-content').innerHTML = employeesHtml
+            document.getElementById('employees-content').innerHTML = employeesHtml || '<div class="text-center py-8 text-gray-500">No employees yet. Add your first employee!</div>'
         }
 
         function renderProjects() {
@@ -2073,9 +2158,20 @@
 
         // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM loaded, initializing app...')
+            
+            // Initialize theme
             initTheme()
-            await loadAllData()
-            renderDashboard()
+            
+            // Initialize Supabase
+            if (initializeSupabase()) {
+                // Load data if Supabase is initialized successfully
+                await loadAllData()
+                renderDashboard()
+            } else {
+                // Show error message if Supabase initialization failed
+                showError('Please configure your Supabase credentials to use the app')
+            }
         })
 
         // Close modals when clicking outside
