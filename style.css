@@ -1205,6 +1205,94 @@ body {
   }
 }
 
+/* Medium screens (950px - 768px) - Specific fix for Expenses and Payments sections */
+@media (max-width: 950px) and (min-width: 768px) {
+  /* Fix for Expenses section */
+  #expenses .grid-cols-3 {
+    grid-template-columns: 1fr; /* Stack the total expenses and expenses by category */
+  }
+  
+  #expenses .card[style="grid-column: span 2;"] {
+    grid-column: span 1; /* Reset the span to ensure proper stacking */
+  }
+  
+  /* Fix for Payments section */
+  #payments .grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr); /* Keep the two cards side by side */
+    gap: 1rem; /* Reduce the gap slightly for better fit */
+  }
+  
+  /* Improve table display for both sections */
+  #expenses .table-container,
+  #payments .table-container {
+    overflow-x: auto;
+    margin: 0 -0.5rem; /* Create negative margin to allow full width scrolling */
+    padding: 0 0.5rem;
+    max-width: calc(100% + 1rem);
+  }
+  
+  /* Adjust table cell spacing for better readability */
+  #expenses .table th,
+  #expenses .table td,
+  #payments .table th,
+  #payments .table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  
+  /* Ensure action buttons are properly sized and aligned */
+  #expenses .table .btn-sm,
+  #payments .table .btn-sm {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+    min-width: 60px;
+  }
+  
+  /* Improve spacing in the page header for these sections */
+  #expenses .page-header,
+  #payments .page-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Adjust the add buttons to fit better */
+  #expenses .btn-primary,
+  #payments .btn-primary {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Improve modal display for forms */
+  #expenseModal .modal-content,
+  #paymentModal .modal-content {
+    max-width: 450px;
+    padding: 1.5rem;
+  }
+  
+  /* Adjust form inputs for better fit */
+  #expenseForm .form-input,
+  #expenseForm .form-select,
+  #paymentForm .form-input,
+  #paymentForm .form-select {
+    padding: 0.625rem;
+    min-height: 40px;
+  }
+  
+  /* Ensure stat values are properly sized */
+  #expenses .stat-value,
+  #payments .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  /* Adjust card padding for better spacing */
+  #expenses .card,
+  #payments .card {
+    padding: 1rem;
+  }
+}
+
 /* Print Styles */
 @media print {
   .sidebar,
