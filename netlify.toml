@@ -1,0 +1,9 @@
+[build]
+  publish = "/"
+
+[template.environment]
+  SUPABASE_URL = "Your Supabase URL"
+  SUPABASE_ANON_KEY = "Your Supabase anon key"
+
+[[plugins]]
+  package = "netlify-plugin-inline-functions-env"
