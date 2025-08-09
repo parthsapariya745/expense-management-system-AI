@@ -6,772 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expenses Management System</title>
 
-    <!-- Supabase CDN  -->
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Environment Variables -->
-    <script>
-        // Make environment variables available to the frontend when deployed on Netlify
-        window.SUPABASE_URL = '{{ SUPABASE_URL }}'
-        window.SUPABASE_ANON_KEY = '{{ SUPABASE_ANON_KEY }}'
-    </script>
-
-    <style>
-        :root {
-            /* Light theme colors */
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --border-color: #e2e8f0;
-            --border-light: #f1f5f9;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --shadow-hover: rgba(0, 0, 0, 0.15);
-            --accent-blue: #2563eb;
-            --accent-blue-hover: #1d4ed8;
-            --accent-blue-light: #dbeafe;
-            --accent-green: #059669;
-            --accent-green-light: #dcfce7;
-            --accent-red: #dc2626;
-            --accent-red-light: #fee2e2;
-            --accent-yellow: #d97706;
-            --accent-yellow-light: #fef3c7;
-            --sidebar-bg: #ffffff;
-            --sidebar-border: #e2e8f0;
-            --card-bg: #ffffff;
-            --input-bg: #ffffff;
-            --input-border: #d1d5db;
-            --input-focus: #2563eb;
-            --table-header-bg: #f9fafb;
-            --modal-overlay: rgba(0, 0, 0, 0.5);
-        }
-
-        [data-theme="dark"] {
-            /* Dark theme colors */
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --border-light: #475569;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --shadow-hover: rgba(0, 0, 0, 0.4);
-            --accent-blue: #3b82f6;
-            --accent-blue-hover: #2563eb;
-            --accent-blue-light: #1e3a8a;
-            --accent-green: #10b981;
-            --accent-green-light: #064e3b;
-            --accent-red: #ef4444;
-            --accent-red-light: #7f1d1d;
-            --accent-yellow: #f59e0b;
-            --accent-yellow-light: #78350f;
-            --sidebar-bg: #1e293b;
-            --sidebar-border: #334155;
-            --card-bg: #1e293b;
-            --input-bg: #334155;
-            --input-border: #475569;
-            --input-focus: #3b82f6;
-            --table-header-bg: #334155;
-            --modal-overlay: rgba(0, 0, 0, 0.7);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Overlay Styling */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        /* Loader Container */
-        .loader-container {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Spinner Circle */
-        .spinner {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border: 8px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #ffffff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        /* Loading Text Centered Inside Spinner */
-        .loading-text {
-            position: absolute;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        /* Spin Animation */
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Optional: Hide Overlay Initially */
-        .hidden {
-            display: none;
-        }
-
-
-        /* Error Message */
-        .error-message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent-red);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
-            text-align: center;
-        }
-
-        .success-message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent-green);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
-            text-align: center;
-        }
-
-        /* Theme Toggle Button */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1001;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 8px var(--shadow);
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            box-shadow: 0 4px 12px var(--shadow-hover);
-            transform: translateY(-2px);
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: 250px;
-            background: var(--sidebar-bg);
-            box-shadow: 0 1px 3px var(--shadow);
-            padding: 0;
-            border-right: 1px solid var(--sidebar-border);
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .sidebar-header h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .sidebar-nav {
-            padding: 1rem 0;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-        }
-
-        .nav-item:hover {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .nav-item.active {
-            background-color: var(--accent-blue-light);
-            color: var(--accent-blue);
-            border-right: 2px solid var(--accent-blue);
-        }
-
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-            margin-right: 0.75rem;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            padding-top: 80px;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .page-header {
-            margin-bottom: 2rem;
-        }
-
-        .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .page-subtitle {
-            color: var(--text-secondary);
-        }
-
-        /* Cards */
-        .card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px var(--shadow);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        /* Grid Layout */
-        .grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .grid-cols-1 {
-            grid-template-columns: 1fr;
-        }
-
-        .grid-cols-2 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .grid-cols-3 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        .grid-cols-4 {
-            grid-template-columns: repeat(4, 1fr);
-        }
-
-        @media (max-width: 768px) {
-
-            .grid-cols-2,
-            .grid-cols-3,
-            .grid-cols-4 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background-color: var(--accent-blue);
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background-color: var(--accent-blue-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--bg-tertiary);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background-color: var(--border-color);
-            color: var(--text-primary);
-        }
-
-        .btn-danger {
-            background-color: var(--accent-red);
-            color: white;
-        }
-
-        .btn-danger:hover:not(:disabled) {
-            background-color: #b91c1c;
-        }
-
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .form-input,
-        .form-select {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            font-size: 0.875rem;
-            transition: border-color 0.2s;
-            background-color: var(--input-bg);
-            color: var(--text-primary);
-        }
-
-        .form-input:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        /* Tables */
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th,
-        .table td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .table th {
-            font-weight: 600;
-            color: var(--text-primary);
-            background-color: var(--table-header-bg);
-        }
-
-        .table td {
-            color: var(--text-secondary);
-        }
-
-        /* Badges */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .badge-green {
-            background-color: var(--accent-green-light);
-            color: var(--accent-green);
-        }
-
-        .badge-yellow {
-            background-color: var(--accent-yellow-light);
-            color: var(--accent-yellow);
-        }
-
-        .badge-blue {
-            background-color: var(--accent-blue-light);
-            color: var(--accent-blue);
-        }
-
-        .badge-red {
-            background-color: var(--accent-red-light);
-            color: var(--accent-red);
-        }
-
-        .badge-gray {
-            background-color: var(--bg-tertiary);
-            color: var(--text-secondary);
-        }
-
-        /* Stats Cards */
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px var(--shadow);
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-title {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .stat-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stat-value {
-            font-size: 1.875rem;
-            font-weight: 700;
-        }
-
-        .stat-green {
-            color: var(--accent-green);
-        }
-
-        .stat-red {
-            color: var(--accent-red);
-        }
-
-        .stat-blue {
-            color: var(--accent-blue);
-        }
-
-        .icon-green {
-            background-color: var(--accent-green-light);
-            color: var(--accent-green);
-        }
-
-        .icon-red {
-            background-color: var(--accent-red-light);
-            color: var(--accent-red);
-        }
-
-        .icon-blue {
-            background-color: var(--accent-blue-light);
-            color: var(--accent-blue);
-        }
-
-        /* Tabs */
-        .tabs {
-            margin-bottom: 1.5rem;
-        }
-
-        .tab-list {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
-        }
-
-        .tab-button {
-            padding: 0.75rem 1rem;
-            border: none;
-            background: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .tab-button.active {
-            color: var(--accent-blue);
-            border-bottom-color: var(--accent-blue);
-        }
-
-        .tab-button:hover {
-            color: var(--text-primary);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--modal-overlay);
-            z-index: 1000;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-            padding: 0.25rem;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .close-btn:hover {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        /* Utility Classes */
-        .flex {
-            display: flex;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .justify-between {
-            justify-content: space-between;
-        }
-
-        .gap-2 {
-            gap: 0.5rem;
-        }
-
-        .gap-4 {
-            gap: 1rem;
-        }
-
-        .mb-4 {
-            margin-bottom: 1rem;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Custom scrollbar for dark mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                order: 2;
-            }
-
-            .main-content {
-                order: 1;
-                padding: 1rem;
-                padding-top: 80px;
-            }
-
-            .theme-toggle {
-                top: 10px;
-                right: 10px;
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-            }
-        }
-
-        /* Dark mode specific adjustments */
-        [data-theme="dark"] .nav-item.active {
-            background-color: rgba(59, 130, 246, 0.2);
-        }
-
-        [data-theme="dark"] .badge-green {
-            background-color: rgba(16, 185, 129, 0.2);
-        }
-
-        [data-theme="dark"] .badge-yellow {
-            background-color: rgba(245, 158, 11, 0.2);
-        }
-
-        [data-theme="dark"] .badge-blue {
-            background-color: rgba(59, 130, 246, 0.2);
-        }
-
-        [data-theme="dark"] .badge-red {
-            background-color: rgba(239, 68, 68, 0.2);
-        }
-
-        [data-theme="dark"] .icon-green {
-            background-color: rgba(16, 185, 129, 0.2);
-        }
-
-        [data-theme="dark"] .icon-red {
-            background-color: rgba(239, 68, 68, 0.2);
-        }
-
-        [data-theme="dark"] .icon-blue {
-            background-color: rgba(59, 130, 246, 0.2);
-        }
-    </style>
+    <!-- link css -->
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- Loading Overlay -->
+     <!-- Loading Overlay  -->
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="loader-container">
             <div class="spinner"></div>
@@ -779,15 +22,22 @@
         </div>
     </div>
 
+     <!-- Mobile Menu Toggle  -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" id="mobileMenuToggle">
+        ☰
+    </button>
 
-    <!-- Theme Toggle Button  -->
+     <!-- Mobile Overlay  -->
+    <div class="mobile-overlay" onclick="closeMobileMenu()" id="mobileOverlay"></div>
+
+     <!-- Theme Toggle Button  -->
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
         🌙
     </button>
 
     <div class="container">
-        <!-- Sidebar  -->
-        <div class="sidebar">
+         <!-- Sidebar  -->
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h1>Expense Manager</h1>
             </div>
@@ -819,9 +69,9 @@
             </nav>
         </div>
 
-        <!-- Main Content  -->
-        <div class="main-content">
-            <!-- Dashboard Page  -->
+         <!-- Main Content  -->
+        <div class="main-content" id="mainContent">
+             <!-- Dashboard Page  -->
             <div id="dashboard" class="page active">
                 <div class="page-header">
                     <h1 class="page-title">Dashboard</h1>
@@ -875,7 +125,7 @@
                 </div>
             </div>
 
-            <!-- Projects Page  -->
+             <!-- Projects Page  -->
             <div id="projects" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -898,7 +148,7 @@
                 </div>
             </div>
 
-            <!-- Clients Page  -->
+             <!-- Clients Page  -->
             <div id="clients" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -912,7 +162,7 @@
                 <div id="clients-content" class="grid grid-cols-3"></div>
             </div>
 
-            <!-- Expenses Page  -->
+             <!-- Expenses Page  -->
             <div id="expenses" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -937,22 +187,24 @@
 
                 <div class="card">
                     <h3 class="card-title">All Expenses</h3>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th class="text-right">Amount</th>
-                                <th class="text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expenses-table"></tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th class="text-right">Amount</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenses-table"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- Payments Page  -->
+             <!-- Payments Page  -->
             <div id="payments" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -977,23 +229,25 @@
 
                 <div class="card">
                     <h3 class="card-title">All Payments</h3>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Client</th>
-                                <th>Service</th>
-                                <th class="text-right">Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th class="text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="payments-table"></tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Service</th>
+                                    <th class="text-right">Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-table"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- Employees Page  -->
+             <!-- Employees Page  -->
             <div id="employees" class="page">
                 <div class="page-header flex justify-between items-center">
                     <div>
@@ -1009,8 +263,8 @@
         </div>
     </div>
 
-    <!-- Modals  -->
-    <!-- Client Modal  -->
+     <!-- Modals  -->
+     <!-- Client Modal  -->
     <div id="clientModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1057,7 +311,7 @@
         </div>
     </div>
 
-    <!-- Expense Modal  -->
+     <!-- Expense Modal  -->
     <div id="expenseModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1102,7 +356,7 @@
         </div>
     </div>
 
-    <!-- Payment Modal  -->
+     <!-- Payment Modal  -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1146,7 +400,7 @@
         </div>
     </div>
 
-    <!-- Employee Modal  -->
+     <!-- Employee Modal  -->
     <div id="employeeModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1175,14 +429,13 @@
                         <span class="btn-text">Save Employee</span>
                         <div class="loading hidden"></div>
                     </button>
-                    <button type="button" class="btn btn-secondary"
-                        onclick="closeModal('employeeModal')">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('employeeModal')">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Project Modal  -->
+     <!-- Project Modal  -->
     <div id="projectModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1234,7 +487,6 @@
 
     <script>
         // ===== SUPABASE CONFIGURATION =====
-        // 🚨 IMPORTANT: Replace these with your actual Supabase credentials
         const SUPABASE_URL = 'https://mgzqdvqqncrhvikcpvrg.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nenFkdnFxbmNyaHZpa2NwdnJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTI3MjksImV4cCI6MjA3MDIyODcyOX0.sIyva_Qh1wQapHbzYeuKHc7DfIQdgn5hMBCKBdb0Zgo';
 
@@ -1247,6 +499,38 @@
         let projects = []
         let editingId = null
         let currentProjectStatus = 'Current'
+
+        // ===== MOBILE MENU FUNCTIONS =====
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            const toggle = document.getElementById('mobileMenuToggle');
+            
+            if (sidebar.classList.contains('open')) {
+                closeMobileMenu();
+            } else {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                toggle.innerHTML = '✕';
+            }
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            const toggle = document.getElementById('mobileMenuToggle');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            toggle.innerHTML = '☰';
+        }
+
+        // Close mobile menu when window is resized to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 767) {
+                closeMobileMenu();
+            }
+        });
 
         // ===== UTILITY FUNCTIONS =====
         function showLoading() {
@@ -1303,18 +587,15 @@
         // ===== SUPABASE INITIALIZATION =====
         function initializeSupabase() {
             try {
-                // Check if Supabase is loaded
                 if (typeof window.supabase === 'undefined') {
                     throw new Error('Supabase library not loaded')
                 }
 
-                // Check if credentials are configured
                 if (SUPABASE_URL.includes('your-') || SUPABASE_ANON_KEY.includes('your-') ||
                     !SUPABASE_URL || !SUPABASE_ANON_KEY) {
-                    throw new Error('Please configure your Supabase credentials in the code or environment variables')
+                    throw new Error('Please configure your Supabase credentials')
                 }
 
-                // Initialize Supabase client
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
                 if (!supabase) {
@@ -1340,7 +621,6 @@
             try {
                 console.log('Loading data from Supabase...')
 
-                // Load all data in parallel
                 const [clientsRes, expensesRes, paymentsRes, employeesRes, projectsRes] = await Promise.all([
                     supabase.from('clients').select('*').order('created_at', { ascending: false }),
                     supabase.from('expenses').select('*').order('created_at', { ascending: false }),
@@ -1453,6 +733,9 @@
                 // Update active nav item
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'))
                 item.classList.add('active')
+
+                // Close mobile menu after navigation
+                closeMobileMenu()
             })
         })
 
