@@ -2,8 +2,8 @@
   publish = "/"
 
 [template.environment]
-  SUPABASE_URL = "Your Supabase URL"
-  SUPABASE_ANON_KEY = "Your Supabase anon key"
+  SUPABASE_URL = "https://mgzqdvqqncrhvikcpvrg.supabase.co"
+  SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nenFkdnFxbmNyaHZpa2NwdnJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTI3MjksImV4cCI6MjA3MDIyODcyOX0.sIyva_Qh1wQapHbzYeuKHc7DfIQdgn5hMBCKBdb0Zgo"
 
 [[plugins]]
   package = "netlify-plugin-inline-functions-env"
