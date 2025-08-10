@@ -366,18 +366,20 @@ function renderExpenses() {
 
     // Expenses table
     const expensesTableHtml = expenses.map(expense => `
-                <tr>
-                    <td>${expense.date}</td>
-                    <td>${expense.description}</td>
-                    <td><span class="badge badge-gray">${expense.category}</span></td>
-                    <td class="text-right font-medium">$${expense.amount.toLocaleString()}</td>
-                    <td class="text-right">
-                        <button class="btn btn-sm btn-secondary" onclick="editExpense('${expense.id}')">✏️</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteExpense('${expense.id}')">🗑️</button>
-                    </td>
-                </tr>
-            `).join('')
-    document.getElementById('expenses-table').innerHTML = expensesTableHtml || '<tr><td colspan="5" class="text-center text-gray-500">No expenses yet</td></tr>'
+    <div class="expense-row">
+        <div class="expense-cell">${expense.date}</div>
+        <div class="expense-cell">${expense.description}</div>
+        <div class="expense-cell">${expense.category}</div>
+        <div class="expense-cell amount">$${expense.amount.toLocaleString()}</div>
+        <div class="expense-cell actions">
+            <button class="btn edit" onclick="editExpense('${expense.id}')">✏️</button>
+            <button class="btn delete" onclick="deleteExpense('${expense.id}')">🗑️</button>
+        </div>
+    </div>
+`).join('');
+
+document.getElementById('expenses-table').innerHTML =
+    expensesTableHtml || '<div class="no-expenses"><p>No expenses yet</p></div>';
 }
 
 function renderPayments() {
