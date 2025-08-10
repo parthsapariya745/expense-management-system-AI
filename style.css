@@ -1355,9 +1355,6 @@ body {
 
 /* Responsive for Mobile */
 @media (max-width: 768px) {
-    .expenses-header {
-        display: none;
-    }
     #expenses-table .card-row {
         grid-template-columns: 1fr;
         padding: 10px;
@@ -1376,51 +1373,35 @@ body {
 
 /* Medium screens (950px - 768px) - Specific fix for Expenses and Payments sections */
 @media (max-width: 950px) and (min-width: 768px) {
-  /* Scrollable table container */
-  #expenses .table-container,
-  #payments .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+    .expense-row {
+        grid-template-columns: 1fr 1fr; /* 2 columns per row */
+        grid-template-areas:
+            "date amount"
+            "description category"
+            "actions actions";
+        gap: 0.5rem 1rem;
+        align-items: center;
+    }
 
-  /* Make table flexible */
-  .table-container .table {
-    width: 100%;
-    table-layout: auto;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Dynamic table cells adjust */
-  #expenses .table th,
-  #expenses .table td,
-  #payments .table th,
-  #payments .table td {
-    padding: 0.6rem 0.5rem;
-    font-size: 0.85rem;
-    white-space: normal;
-    word-break: break-word;
-  }
-
-  /* Keep last column compact (Actions) */
-  #expenses .table td:last-child,
-  #payments .table td:last-child {
-    white-space: nowrap;
-  }
-
-  /* Adjust Category column */
-  #expenses .table th:nth-child(3),
-  #payments .table th:nth-child(3) {
-    min-width: 80px;
-  }
-
-  /* Buttons smaller for mid screens */
-  #expenses .table .btn-sm,
-  #payments .table .btn-sm {
-    padding: 0.3rem 0.5rem;
-    font-size: 0.75rem;
-    min-width: 55px;
-  }
+    .expense-row .expense-cell:nth-child(1) {
+        grid-area: date;
+    }
+    .expense-row .expense-cell:nth-child(2) {
+        grid-area: description;
+    }
+    .expense-row .expense-cell:nth-child(3) {
+        grid-area: amount;
+        text-align: right;
+    }
+    .expense-row .expense-cell:nth-child(4) {
+        grid-area: category;
+    }
+    .expense-row .expense-cell:nth-child(5) {
+        grid-area: actions;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
 }
 
 /* Print Styles */

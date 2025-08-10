@@ -369,8 +369,8 @@ function renderExpenses() {
     <div class="expense-row">
         <div class="expense-cell">${expense.date}</div>
         <div class="expense-cell">${expense.description}</div>
-        <div class="expense-cell">${expense.category}</div>
         <div class="expense-cell amount">$${expense.amount.toLocaleString()}</div>
+        <div class="expense-cell">${expense.category}</div>
         <div class="expense-cell actions">
             <button class="btn edit" onclick="editExpense('${expense.id}')">✏️</button>
             <button class="btn delete" onclick="deleteExpense('${expense.id}')">🗑️</button>
