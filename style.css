@@ -506,37 +506,6 @@ body {
   background: var(--card-bg);
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-
-.table th,
-.table td {
-  padding: 1rem 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 0.875rem;
-}
-
-.table th {
-  font-weight: 600;
-  color: var(--text-primary);
-  background-color: var(--table-header-bg);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.table td {
-  color: var(--text-secondary);
-}
-
-.table tbody tr:hover {
-  background-color: var(--bg-tertiary);
-}
-
 /* Badges */
 .badge {
   display: inline-flex;
@@ -1091,15 +1060,6 @@ body {
     font-size: 0.8rem;
   }
 
-  .table {
-    font-size: 0.8rem;
-  }
-
-  .table th,
-  .table td {
-    padding: 0.75rem 0.5rem;
-  }
-
   .modal-content {
     margin: 0.5rem;
     padding: 1.25rem;
@@ -1371,37 +1331,17 @@ body {
 }
 
 
-/* Medium screens (950px - 768px) - Specific fix for Expenses and Payments sections */
-@media (max-width: 950px) and (min-width: 768px) {
-    .expense-row {
-        grid-template-columns: 1fr 1fr; /* 2 columns per row */
-        grid-template-areas:
-            "date amount"
-            "description category"
-            "actions actions";
-        gap: 0.5rem 1rem;
-        align-items: center;
-    }
-
-    .expense-row .expense-cell:nth-child(1) {
-        grid-area: date;
-    }
-    .expense-row .expense-cell:nth-child(2) {
-        grid-area: description;
-    }
-    .expense-row .expense-cell:nth-child(3) {
-        grid-area: amount;
-        text-align: right;
-    }
-    .expense-row .expense-cell:nth-child(4) {
-        grid-area: category;
-    }
-    .expense-row .expense-cell:nth-child(5) {
-        grid-area: actions;
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.5rem;
-    }
+@media (max-width: 950px) {
+  .expenses-header, .expense-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+@media (max-width: 480px) {
+  .expenses-header, .expense-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
 }
 
 /* Print Styles */

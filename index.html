@@ -228,19 +228,16 @@
                 <div class="card">
                     <h3 class="card-title">All Payments</h3>
                     <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Client</th>
-                                    <th>Service</th>
-                                    <th class="text-right">Amount</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th class="text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="payments-table"></tbody>
-                        </table>
+                        <div class="table">
+                            <div class="expenses-header">
+                                <div class="col">Date</div>
+                                <div class="col">Description</div>
+                                <div class="col">Amount</div>
+                                <div class="col">Category</div>
+                                <div class="col">Actions</div>
+                            </div>
+                            <div id="expenses-table"></div>
+                        </div>
                     </div>
                 </div>
             </div>
