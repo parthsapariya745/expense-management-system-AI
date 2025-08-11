@@ -856,81 +856,82 @@ body {
   background-color: rgba(59, 130, 246, 0.2);
 }
 
-#expenses-table {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-    padding: 15px;
-    transition: .4s;
-}
-#expenses-table:hover {
-  background-color: #2F4054;
-}
-#expenses-table {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+#expenses-table, #payments-table {
+  padding: 15px;
+  transition: .4s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
+.same2 {
+  display: grid;
+  align-items: center;
+  border-radius: 8px;
+  color: #CBD5E1;
+  font-size: 14px;
+}
 .expense-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
-    align-items: center;
-    border-radius: 8px;
-    color: #CBD5E1;
-    font-size: 14px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+.payment-row {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
-.expense-cell {
-    display: flex;
-    align-items: center;
+.expense-cell, .payment-cell {
+  display: flex;
+  align-items: center;
 }
 .amount {
-    font-weight: 500;
+  font-weight: 500;
 }
 
 .status {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    text-align: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  text-align: center;
 }
 
 .status.paid {
-    background: #024b41;
-    color: #00ffb3;
+  background: #024b41;
+  color: #00ffb3;
 }
 
 .actions {
-    display: flex;
-    gap: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .btn {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 .btn.edit {
-    background: #1f2c3f;
-    color: #ffb347;
+  background: #1f2c3f;
+  color: #ffb347;
 }
 
 .btn.delete {
-    background: #ff4b4b;
-    color: white;
+  background: #ff4b4b;
+  color: white;
 }
 
 .no-expenses {
-    text-align: center;
-    color: #999;
+  text-align: center;
+  color: #999;
+}
+.line {
+  height: 1px;
+  width: 100%;
+  background-color: #334155;
+  margin-block: 5px;
 }
 
-
 /* Responsive Design */
-
 /* Large Desktop (1200px+) */
 @media (min-width: 1200px) {
   .main-content {
@@ -1254,9 +1255,24 @@ body {
     font-weight: bold;
     color: #ffffff;
 }
+.same {
+    display: grid;
+    background-color: #2f4054;
+    padding: 12px 15px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.expenses-header {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+
+.payments-header {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
 
 /* Header Column Text */
-.expenses-header .col {
+.same .col {
     display: flex;
     align-items: center;
     font-size: 14px;
@@ -1332,13 +1348,13 @@ body {
 
 
 @media (max-width: 950px) {
-  .expenses-header, .expense-row {
+  .expenses-header, .expense-row, .payments-header, .payment-row {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
 }
 @media (max-width: 480px) {
-  .expenses-header, .expense-row {
+  .expenses-header, .expense-row, .payments-header, .payment-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }

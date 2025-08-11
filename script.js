@@ -366,7 +366,7 @@ function renderExpenses() {
 
     // Expenses table
     const expensesTableHtml = expenses.map(expense => `
-    <div class="expense-row">
+    <div class="expense-row same2">
         <div class="expense-cell">${expense.date}</div>
         <div class="expense-cell">${expense.description}</div>
         <div class="expense-cell amount">$${expense.amount.toLocaleString()}</div>
@@ -376,7 +376,8 @@ function renderExpenses() {
             <button class="btn delete" onclick="deleteExpense('${expense.id}')">🗑️</button>
         </div>
     </div>
-`).join('');
+    <div class="line"></div>
+    `).join('');
 
 document.getElementById('expenses-table').innerHTML =
     expensesTableHtml || '<div class="no-expenses"><p>No expenses yet</p></div>';
@@ -390,19 +391,25 @@ function renderPayments() {
     document.getElementById('payments-pending').textContent = `$${totalPending.toLocaleString()}`
 
     const paymentsTableHtml = payments.map(payment => `
-                <tr>
-                    <td>${payment.clientName}</td>
-                    <td>${payment.serviceName}</td>
-                    <td class="text-right font-medium">$${payment.serviceCost.toLocaleString()}</td>
-                    <td><span class="badge ${payment.status === 'Paid' ? 'badge-green' : 'badge-yellow'}">${payment.status}</span></td>
-                    <td>${payment.date}</td>
-                    <td class="text-right">
-                        <button class="btn btn-sm btn-secondary" onclick="editPayment('${payment.id}')">✏️</button>
-                        <button class="btn btn-sm btn-danger" onclick="deletePayment('${payment.id}')">🗑️</button>
-                    </td>
-                </tr>
-            `).join('')
-    document.getElementById('payments-table').innerHTML = paymentsTableHtml || '<tr><td colspan="6" class="text-center text-gray-500">No payments yet</td></tr>'
+    <div class="payment-row same2">
+        <div class="payment-cell">${payment.clientName}</div>
+        <div class="payment-cell">${payment.serviceName}</div>
+        <div class="payment-cell amount">$${payment.serviceCost.toLocaleString()}</div>
+        <div class="payment-cell">
+            <span class="badge ${payment.status === 'Paid' ? 'badge-green' : 'badge-yellow'}">
+                ${payment.status}
+            </span>
+        </div>
+        <div class="payment-cell">${payment.date}</div>
+        <div class="payment-cell actions">
+            <button class="btn edit" onclick="editPayment('${payment.id}')">✏️</button>
+            <button class="btn delete" onclick="deletePayment('${payment.id}')">🗑️</button>
+        </div>
+    </div>
+    <div class="line"></div>
+    `).join('');
+
+    document.getElementById('payments-table').innerHTML = paymentsTableHtml || '<div class="text-center text-gray-500">No payments yet</div>';
 }
 
 function renderEmployees() {
