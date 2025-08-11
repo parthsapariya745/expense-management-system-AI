@@ -411,7 +411,7 @@ function renderPayments() {
     <div class="line"></div>
     `).join('');
 
-    document.getElementById('payments-table').innerHTML = paymentsTableHtml || '<div class="text-center text-gray-500">No payments yet</div>';
+    document.getElementById('payments-table').innerHTML = paymentsTableHtml || '<div class="no-expenses">No payments yet</div>';
 }
 
 function renderEmployees() {
