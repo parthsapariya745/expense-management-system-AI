@@ -174,6 +174,8 @@ async function loadAllData() {
             clientName: payment.client_name,
             serviceName: payment.service_name,
             serviceCost: parseFloat(payment.service_cost),
+            amountPaid: parseFloat(payment.amount_paid || 0),
+            pendingAmount: parseFloat(payment.pending_amount || 0),
             status: payment.status,
             date: payment.date
         }))
@@ -384,8 +386,8 @@ document.getElementById('expenses-table').innerHTML =
 }
 
 function renderPayments() {
-    const totalPaid = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.serviceCost, 0)
-    const totalPending = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.serviceCost, 0)
+    const totalPaid = payments.reduce((sum, p) => sum + (p.amountPaid || 0), 0)
+    const totalPending = payments.reduce((sum, p) => sum + (p.pendingAmount || 0), 0)
 
     document.getElementById('payments-paid').textContent = `$${totalPaid.toLocaleString()}`
     document.getElementById('payments-pending').textContent = `$${totalPending.toLocaleString()}`
@@ -529,6 +531,7 @@ function openExpenseModal() {
 
 function openPaymentModal() {
     populatePaymentClientSelect()
+    setupPaymentCalculation()
     openModal('paymentModal')
 }
 
@@ -559,8 +562,38 @@ function populatePaymentClientSelect() {
         if (selectedClient) {
             document.getElementById('paymentService').value = selectedClient.serviceName
             document.getElementById('paymentCost').value = selectedClient.serviceCost
+            document.getElementById('paymentAmountPaid').value = 0
+            calculatePendingAmount()
         }
     })
+}
+
+// Add event listeners for real-time calculation of pending amount
+function setupPaymentCalculation() {
+    const costInput = document.getElementById('paymentCost')
+    const amountPaidInput = document.getElementById('paymentAmountPaid')
+    
+    costInput.addEventListener('input', calculatePendingAmount)
+    amountPaidInput.addEventListener('input', calculatePendingAmount)
+}
+
+// Calculate pending amount based on total cost and amount paid
+function calculatePendingAmount() {
+    const totalCost = parseFloat(document.getElementById('paymentCost').value) || 0
+    const amountPaid = parseFloat(document.getElementById('paymentAmountPaid').value) || 0
+    
+    // Ensure amount paid doesn't exceed total cost
+    if (amountPaid > totalCost) {
+        document.getElementById('paymentAmountPaid').value = totalCost
+        document.getElementById('paymentPendingAmount').value = 0
+        // Update payment status to Paid if amount paid equals total cost
+        document.getElementById('paymentStatus').value = 'Paid'
+    } else {
+        const pendingAmount = totalCost - amountPaid
+        document.getElementById('paymentPendingAmount').value = pendingAmount.toFixed(2)
+        // Update payment status based on pending amount
+        document.getElementById('paymentStatus').value = pendingAmount > 0 ? 'Pending' : 'Paid'
+    }
 }
 
 function populateProjectClientSelect() {
@@ -689,13 +722,21 @@ document.getElementById('paymentForm').addEventListener('submit', async function
     try {
         const clientId = document.getElementById('paymentClient').value
         const selectedClient = clients.find(c => c.id === clientId)
+        const totalCost = parseFloat(document.getElementById('paymentCost').value)
+        const amountPaid = parseFloat(document.getElementById('paymentAmountPaid').value) || 0
+        
+        // The database trigger will calculate these values, but we set them here for UI consistency
+        const pendingAmount = totalCost - amountPaid
+        const status = pendingAmount <= 0 ? 'Paid' : 'Pending'
 
         const paymentData = {
             client_id: clientId,
             client_name: selectedClient ? selectedClient.name : '',
             service_name: document.getElementById('paymentService').value,
-            service_cost: parseFloat(document.getElementById('paymentCost').value),
-            status: document.getElementById('paymentStatus').value,
+            total_cost: totalCost,
+            amount_paid: amountPaid,
+            pending_amount: pendingAmount,
+            status: status,
             date: document.getElementById('paymentDate').value
         }
 
@@ -859,9 +900,12 @@ function editPayment(id) {
         editingId = id
         document.getElementById('paymentModalTitle').textContent = 'Edit Payment'
         populatePaymentClientSelect()
+        setupPaymentCalculation()
         document.getElementById('paymentClient').value = payment.clientId
         document.getElementById('paymentService').value = payment.serviceName
         document.getElementById('paymentCost').value = payment.serviceCost
+        document.getElementById('paymentAmountPaid').value = payment.amountPaid || 0
+        document.getElementById('paymentPendingAmount').value = payment.pendingAmount || (payment.serviceCost - (payment.amountPaid || 0))
         document.getElementById('paymentStatus').value = payment.status
         document.getElementById('paymentDate').value = payment.date
         openPaymentModal()
