@@ -733,10 +733,8 @@ document.getElementById('paymentForm').addEventListener('submit', async function
             client_id: clientId,
             client_name: selectedClient ? selectedClient.name : '',
             service_name: document.getElementById('paymentService').value,
-            total_cost: totalCost,
+            service_cost: totalCost,
             amount_paid: amountPaid,
-            pending_amount: pendingAmount,
-            status: status,
             date: document.getElementById('paymentDate').value
         }
 
