@@ -136,7 +136,7 @@ async function loadAllData() {
         const [clientsRes, expensesRes, paymentsRes, employeesRes, projectsRes] = await Promise.all([
             supabase.from('clients').select('*').order('created_at', { ascending: false }),
             supabase.from('expenses').select('*').order('created_at', { ascending: false }),
-            supabase.from('payments').select('*').order('created_at', { ascending: false }),
+            supabase.from('payments').select('id, client_id, client_name, service_name, service_cost, amount_paid, pending_amount, status, date').order('created_at', { ascending: false }),
             supabase.from('employees').select('*').order('created_at', { ascending: false }),
             supabase.from('projects').select('*').order('created_at', { ascending: false })
         ])
@@ -174,8 +174,8 @@ async function loadAllData() {
             clientName: payment.client_name,
             serviceName: payment.service_name,
             serviceCost: parseFloat(payment.service_cost),
-            amountPaid: parseFloat(payment.amount_paid || 0),
-            pendingAmount: parseFloat(payment.pending_amount || 0),
+            amountPaid: parseFloat(payment.amount_paid) || 0,
+            pendingAmount: parseFloat(payment.pending_amount) || 0,
             status: payment.status,
             date: payment.date
         }))
@@ -282,7 +282,7 @@ function showPage(pageId) {
 
 // ===== RENDER FUNCTIONS =====
 function renderDashboard() {
-    const totalIncome = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.serviceCost, 0)
+    const totalIncome = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amountPaid, 0)
     const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
     const netProfit = totalIncome - totalExpenses
     const profitMargin = totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(1) : '0'
@@ -294,17 +294,21 @@ function renderDashboard() {
 
     // Recent payments
     const recentPayments = payments.slice(0, 5).map(payment => `
-                <div class="flex justify-between items-center mb-2">
-                    <div>
-                        <div class="font-medium">${payment.clientName}</div>
-                        <div class="text-sm text-gray-600">${payment.serviceName}</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-medium">$${payment.serviceCost.toLocaleString()}</div>
-                        <span class="badge ${payment.status === 'Paid' ? 'badge-green' : 'badge-yellow'}">${payment.status}</span>
-                    </div>
-                </div>
-            `).join('')
+        <div class="flex justify-between items-center mb-2">
+            <div>
+                <div class="font-medium">${payment.clientName}</div>
+                <div class="text-sm text-gray-600">${payment.serviceName}</div>
+            </div>
+            <div style="text-align: center;">
+                <div class="font-medium">$${payment.amountPaid.toLocaleString()}</div>
+                <span class="badge badge-green">Paid</span>
+            </div>
+            <div class="text-right">
+                <div class="font-medium">$${payment.pendingAmount.toLocaleString()}</div>
+                <span class="badge badge-yellow">Pending</span>
+            </div>
+        </div>
+    `).join('')
     document.getElementById('recent-payments').innerHTML = recentPayments || '<div class="text-gray-500">No payments yet</div>'
 
     // Recent expenses
@@ -756,6 +760,7 @@ document.getElementById('paymentForm').addEventListener('submit', async function
 
         await loadAllData()
         renderPayments()
+        renderDashboard()  // Update the dashboard
         closeModal('paymentModal')
         showSuccess('Payment saved successfully')
     } catch (error) {
