@@ -282,7 +282,10 @@ function showPage(pageId) {
 
 // ===== RENDER FUNCTIONS =====
 function renderDashboard() {
-    const totalIncome = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amountPaid, 0)
+    console.log('Rendering dashboard with payments:', payments)
+    // Calculate total income by summing all paid amounts, regardless of status
+    const totalIncome = payments.reduce((sum, p) => sum + (p.amountPaid || 0), 0)
+    console.log('Calculated total income:', totalIncome)
     const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
     const netProfit = totalIncome - totalExpenses
     const profitMargin = totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(1) : '0'
@@ -759,6 +762,8 @@ document.getElementById('paymentForm').addEventListener('submit', async function
         if (result.error) throw result.error
 
         await loadAllData()
+        console.log('Payments array after reload:', payments)
+        console.log('Total income calculation:', payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amountPaid, 0))
         renderPayments()
         renderDashboard()  // Update the dashboard
         closeModal('paymentModal')
@@ -1016,6 +1021,7 @@ async function deletePayment(id) {
 
             await loadAllData()
             renderPayments()
+            renderDashboard()
             showSuccess('Payment deleted successfully')
         } catch (error) {
             console.error('Error deleting payment:', error)
