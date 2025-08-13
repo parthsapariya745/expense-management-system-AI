@@ -34,6 +34,13 @@
   --header-height: 70px;
   --mobile-padding: 1rem;
   --desktop-padding: 2rem;
+
+  /* New light mode table specific colors */
+  --table-row-bg: #ffffff;
+  --table-row-alt-bg: #f8fafc;
+  --table-border: #e2e8f0;
+  --table-header-text: #1e293b;
+  --table-cell-text: #475569;
 }
 
 [data-theme="dark"] {
@@ -909,8 +916,8 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
 }
-
 .btn.edit {
   background: #1f2c3f;
   color: #ffb347;
@@ -1238,6 +1245,7 @@ body {
     box-shadow: 0 2px 8px var(--shadow-hover);
   }
 }
+
 /* Expenses Container */
 .expenses-container {
     width: 100%;
@@ -1358,6 +1366,65 @@ body {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
+}
+
+/* Light mode specific table styles */
+[data-theme="light"] #expenses-table, [data-theme="light"] #payments-table {
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+[data-theme="light"] .expenses-header, [data-theme="light"] .payments-header {
+  background-color: var(--table-header-bg);
+  color: var(--table-header-text);
+  border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="light"] #expenses-table .card-row, [data-theme="light"] #payments-table .card-row {
+  background-color: var(--table-row-bg);
+  color: var(--table-cell-text);
+  border-bottom: 1px solid var(--border-light);
+}
+
+[data-theme="light"] #expenses-table .card-row:nth-child(even), 
+[data-theme="light"] #payments-table .card-row:nth-child(even) {
+  background-color: var(--table-row-alt-bg);
+}
+
+[data-theme="light"] .status {
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .status.paid {
+  background-color: #dcfce7;
+  color: #059669;
+}
+
+[data-theme="light"] .status.unpaid {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+[data-theme="light"] .btn.edit {
+  background-color: var(--table-row-bg);
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+[data-theme="light"] .btn.edit:hover {
+  background-color: var(--accent-blue-light);
+  color: var(--accent-blue);
+}
+
+[data-theme="light"] .btn.delete {
+  background-color: var(--accent-red-light);
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+[data-theme="light"] .btn.delete:hover {
+  background-color: var(--accent-red);
+  color: white;
 }
 
 /* Print Styles */
