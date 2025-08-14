@@ -1385,6 +1385,9 @@ body {
   color: var(--table-cell-text);
   border-bottom: 1px solid var(--border-light);
 }
+[data-theme="light"] .expense-cell, [data-theme="light"] .payment-cell {
+  color: var(--table-cell-text);
+}
 
 [data-theme="light"] #expenses-table .card-row:nth-child(even), 
 [data-theme="light"] #payments-table .card-row:nth-child(even) {
